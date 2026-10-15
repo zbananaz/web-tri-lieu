@@ -18,7 +18,7 @@ const schema = z.object({
   API_PORT: z.coerce.number().int().default(4000),
   WEB_ORIGIN: z.string().default('http://localhost:3000'),
   SESSION_TTL_DAYS: z.coerce.number().int().default(14),
-  HOTLINES: z.string().default('115:Cap cuu y te,111:Tong dai bao ve tre em'),
+  HOTLINES: z.string().default('115:Cấp cứu y tế,111:Tổng đài bảo vệ trẻ em'),
   SEED_PASSWORD: z.string().optional(),
 });
 
