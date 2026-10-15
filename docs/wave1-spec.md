@@ -31,3 +31,14 @@ Gửi thư qua SMTP (biến môi trường `SMTP_URL`, `MAIL_FROM`); chưa cấu
 
 ## Ngoài phạm vi đợt này
 Thanh toán online, video call tích hợp, nhắc lịch (cần bộ lập lịch), đơn đăng ký chuyên gia, chatbot AI lâm sàng.
+
+## Cập nhật sau rà soát (thay thế các đoạn mâu thuẫn ở trên)
+
+- **Phạm vi chia sẻ**: chuyên gia chỉ xem mục khách đã chia sẻ khi ca ở trạng thái `assigned/contacted/in_treatment` (`CHAT_OPEN_STATUSES`); ca đã đóng thì không. Quản trị viên không đọc được ghi chú, nhật ký, bài tập, kết quả tự đánh giá (API trả 403/404).
+- **Đánh giá công khai** không có tên khách (chỉ `id, rating, comment, createdAt`); trang quản trị mới thấy tên để duyệt.
+- **Giờ trống gần nhất** (`nextSlot`): tính trong 14 ngày bằng hai truy vấn dùng chung cho cả danh sách (không N+1), cùng hàm `computeSlots` và `MIN_LEAD_MINUTES` với luồng đặt lịch.
+- **Lọc theo chi phí** (`maxFee`) loại chuyên gia chưa công bố chi phí.
+- **Quên mật khẩu**: giới hạn 3 yêu cầu/giờ/tài khoản tính bằng DB (không phụ thuộc IP); thư ghi ra `data/outbox` chỉ ở dev/test, production không bao giờ ghi token ra đĩa.
+- **Giới hạn tốc độ chung** cấu hình bằng `RATE_LIMIT_PER_MIN` (mặc định 120/phút/IP).
+- **Giao diện**: mặc định mọi mục nhật ký là riêng tư, ô "chia sẻ" tự bỏ chọn sau mỗi lần lưu (đã có test chặn lỗi "dính" lựa chọn sang mục sau).
+- Nội dung PHQ-9/GAD-7 tiếng Việt là bản nháp, cần chuyên gia lâm sàng thẩm định trước khi dùng thật.
