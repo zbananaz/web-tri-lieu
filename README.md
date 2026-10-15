@@ -20,18 +20,18 @@ Chạy trên máy: [docs/HUONG-DAN-CHAY-LOCAL.md](docs/HUONG-DAN-CHAY-LOCAL.md).
 - **Thông báo trong ứng dụng** (chuông, làm mới mỗi 30 giây): đổi trạng thái hồ sơ, đặt/xác nhận/hủy lịch, đánh giá được đăng.
 - **Quên mật khẩu qua email**: liên kết một lần, hiệu lực 45 phút, tối đa 3 yêu cầu/giờ/tài khoản, trả lời giống nhau dù email có tồn tại hay không.
 
-## Dựng lại từ đầu trên máy (Windows, mọi thứ nằm ở ổ D)
+## Dựng lại từ đầu trên máy (Windows)
 
-Công cụ và cache nằm trong `D:\Tool` (node/pnpm, PostgreSQL portable, trình duyệt Playwright). Mỗi shell mới:
+Cần: PowerShell 5.1+, Node.js 22+, pnpm 10.34.7, PostgreSQL 17 (các chương trình `pg_ctl`, `psql`... trên `PATH`), Git. Danh sách đầy đủ, cách cài, cách gom cache sang ổ khác (`WTL_TOOL_DIR`) và xử lý sự cố: **[docs/HUONG-DAN-CHAY-LOCAL.md](docs/HUONG-DAN-CHAY-LOCAL.md)**. Không có đường dẫn nào gắn cứng theo máy. Tại thư mục gốc repo, mỗi shell mới:
 
 ```powershell
-. D:\Project\WebTriLieu\scripts\env.ps1      # đặt cache, PATH về D:\Tool; không sửa registry/PATH hệ thống
+. .\scripts\env.ps1      # nạp môi trường cho riêng cửa sổ này; không sửa registry/PATH hệ thống
 ```
 
 ```powershell
 Copy-Item .env.example .env                    # rồi điền POSTGRES_PASSWORD, DATABASE_URL, SEED_PASSWORD (>= 10 ký tự)
-.\scripts\db.ps1 init                          # lần đầu
-.\scripts\db.ps1 start                         # cổng 54329, chỉ localhost
+.\scripts\db.ps1 init                          # lần đầu: cụm PostgreSQL riêng, cổng 54329, chỉ localhost, dữ liệu trong data\pgdata
+.\scripts\db.ps1 start                         # các lần sau
 pnpm install
 pnpm --filter "@wtl/shared" build
 pnpm db:migrate
@@ -49,10 +49,10 @@ Tài khoản seed: `admin@webtrilieu.local`, `bsminh@webtrilieu.local`, `tlhoa@w
 pnpm check                                     # build shared + typecheck + lint (api, web, e2e) + api: 7 unit + 92 e2e (DB test)
 pnpm e2e                                       # Playwright: 66 test chạy + 12 ảnh chụp màn hình bị bỏ qua (chỉ chạy khi SHOTS=1) (desktop 1280, tablet 768, mobile 375); cần DB đã seed, tự khởi động API/web nếu chưa chạy. Bộ test đăng nhập hơn 20 lần/phút từ một IP nên API chạy cho e2e phải đặt `AUTH_RATE_LIMIT_PER_MIN=300` và `RATE_LIMIT_PER_MIN=2000` (config Playwright và `.claude/launch.json` đã đặt sẵn; production giữ mặc định 20)
 .\scripts\db.ps1 status
-.\scripts\db.ps1 backup                        # pg_dump -> D:\Tool\PostgreSQL\backups (giữ 14 bản); khôi phục: pg_restore -d webtrilieu <file>
+.\scripts\db.ps1 backup                        # pg_dump -> thư mục backups cạnh thư mục dữ liệu DB (giữ 14 bản); khôi phục: pg_restore -d webtrilieu <file>
 ```
 
-Test API dùng DB `webtrilieu_test` (`TEST_DATABASE_URL`). `pnpm e2e` chạy trên DB dev thật (`webtrilieu`) vì đi qua API/web đang chạy: cuối mỗi lần chạy nó xoá bài viết thử, đóng hồ sơ thử, xoá ảnh đã tải lên, xoá thư thử trong `data/outbox`, ẩn đánh giá thử (buổi hẹn "đã hoàn thành" thử được chèn thẳng vào DB dev bằng psql của `D:ToolPostgreSQL`) và khoá tài khoản `e2e.*@example.test` / `wave1.*@example.test` (tài khoản bị khoá vẫn còn lại trong DB, ảnh thử trong `data/uploads` được xoá).
+Test API dùng DB `webtrilieu_test` (`TEST_DATABASE_URL`). `pnpm e2e` chạy trên DB dev thật (`webtrilieu`) vì đi qua API/web đang chạy: cuối mỗi lần chạy nó xoá bài viết thử, đóng hồ sơ thử, xoá ảnh đã tải lên, xoá thư thử trong `data/outbox`, ẩn đánh giá thử (buổi hẹn "đã hoàn thành" thử được chèn thẳng vào DB dev bằng `psql` trên `PATH`, kết nối qua `DATABASE_URL`) và khoá tài khoản `e2e.*@example.test` / `wave1.*@example.test` (tài khoản bị khoá vẫn còn lại trong DB, ảnh thử trong `data/uploads` được xoá).
 
 ## Bảo mật (đã làm)
 

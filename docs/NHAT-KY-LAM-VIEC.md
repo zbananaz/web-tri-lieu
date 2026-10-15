@@ -13,12 +13,20 @@ Quy ước: **sau mỗi việc làm xong, thêm một mục mới ở đầu dan
 
 ## Cách làm việc trong repo (mẹo cho phiên sau)
 
-- Mỗi PowerShell mới: `. D:\Project\WebTriLieu\scripts\env.ps1`.
+- Mỗi PowerShell mới, tại thư mục gốc repo: `. .\scripts\env.ps1`. **Không hardcode đường dẫn máy** vào script/config/tài liệu; đường dẫn riêng của máy chỉ đặt trong `scripts/env.local.ps1` (không commit). Máy của chủ dự án dùng `WTL_TOOL_DIR=D:\Tool`.
 - Lệnh chính: `pnpm check`, `pnpm build`, `pnpm e2e`. Máy chủ chạy bằng `preview_start` tên `api` và `web`.
 - Tránh heredoc Bash có dấu nháy đơn và tránh python để sửa file; dùng công cụ Write/Edit hoặc script `node`.
 - Khi sửa tính năng riêng tư (nhật ký tâm trạng, kết quả đánh giá): mặc định `shared=false`, chuyên gia chỉ thấy mục đã chia sẻ trong ca đang mở; quản trị không đọc ghi chú/nhật ký/bài tập (403 do guard vai trò).
 
 ## Nhật ký
+
+### 2026-10-16 — Bỏ đường dẫn gắn cứng, viết lại hướng dẫn chạy
+- Yêu cầu của chủ dự án: máy nào cũng chạy được; ghi rõ cần công cụ gì, chạy lệnh gì, ở đâu; không hardcode đường dẫn.
+- `scripts/env.ps1` tự tìm gốc repo từ vị trí của chính nó; dùng công cụ trên `PATH`. Nếu có `WTL_TOOL_DIR` (đặt trong `scripts/env.local.ps1`, file bị `.gitignore`, mẫu `env.local.example.ps1`) thì gom cache/PostgreSQL portable/Playwright vào đó. `PGDATA` mặc định `<repo>\data\pgdata`, `PGPORT` mặc định 54329.
+- `scripts/db.ps1`: không còn `D:\...`; tìm `pg_ctl` trên `PATH` và báo lỗi rõ khi thiếu; log/backups nằm cạnh thư mục dữ liệu; `reset` từ chối xóa nếu thư mục không có `PG_VERSION`.
+- `.npmrc` bỏ đường dẫn `D:/Tool` (chuyển sang biến môi trường trong `env.ps1`); `.claude/launch.json` và `packages/e2e/playwright.config.ts` dùng đường dẫn tương đối/tính từ vị trí file; `wave1.spec.ts` gọi `psql` trên `PATH` bằng `DATABASE_URL`.
+- Viết lại `docs/HUONG-DAN-CHAY-LOCAL.md` (công cụ cần cài + phiên bản, cách cài PostgreSQL, lệnh nào chạy ở đâu) và mục "Dựng lại từ đầu" trong README.
+- Kiểm chứng: nạp `env.ps1` từ thư mục khác; `pnpm store path` vẫn là kho cũ; chế độ không có `env.local.ps1` cho `PGDATA=<repo>\data\pgdata`; `db.ps1 init/start/status/stop` trên cụm tạm (cổng 54399, thư mục tạm) chạy đúng. Chưa kiểm trên máy Windows sạch khác và chưa kiểm Linux/macOS.
 
 ### 2026-10-16 — Tạm dừng `/goal`
 - Chủ dự án yêu cầu tạm dừng goal ở đây. Trạng thái: web hoàn chỉnh theo phạm vi hiện tại, không còn việc dở trong code. Phiên sau chỉ cần làm tiếp khi chủ dự án giao việc mới.

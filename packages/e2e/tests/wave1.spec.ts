@@ -15,17 +15,15 @@ const ORIGIN = 'http://localhost:3000';
 let caseId = '';
 let reviewId = '';
 
-// Buoi hen "da hoan thanh" khong tao duoc qua API (buoi phai da dien ra), nen them thang vao DB dev bang psql cua D:Tool.
+// Buoi hen "da hoan thanh" khong tao duoc qua API (buoi phai da dien ra), nen them thang vao DB dev bang psql
+// (psql phai co tren PATH: chay `. .\scripts\env.ps1` truoc, hoac cai PostgreSQL client). Dung DATABASE_URL trong .env.
 function insertCompletedAppointment(id: string) {
-  const pw = process.env.POSTGRES_PASSWORD;
-  if (!pw) throw new Error('Can POSTGRES_PASSWORD trong .env');
+  const url = process.env.DATABASE_URL;
+  if (!url) throw new Error('Can DATABASE_URL trong .env');
   const sql = `INSERT INTO appointments (case_id, expert_id, client_id, starts_at, ends_at, status, mode)
     SELECT id, assigned_expert_id, client_id, now() - interval '2 days', now() - interval '2 days' + interval '50 minutes', 'completed', 'online'
     FROM cases WHERE id = '${id}'`;
-  execFileSync('D:/Tool/PostgreSQL/pgsql/bin/psql.exe', ['-h', '127.0.0.1', '-p', '54329', '-U', 'postgres', '-d', 'webtrilieu', '-v', 'ON_ERROR_STOP=1', '-c', sql], {
-    env: { ...process.env, PGPASSWORD: pw },
-    stdio: 'pipe',
-  });
+  execFileSync('psql', [url, '-v', 'ON_ERROR_STOP=1', '-c', sql], { stdio: 'pipe' });
 }
 
 async function outboxFilesFor(to: string): Promise<{ file: string; text: string }[]> {
