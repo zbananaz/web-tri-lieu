@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   HttpException,
   HttpStatus,
@@ -11,7 +12,7 @@ import { eq } from 'drizzle-orm';
 import { AuditService } from '../audit/audit.service.js';
 import type { Db } from '../db/client.js';
 import { DB } from '../db/db.module.js';
-import { users } from '../db/schema.js';
+import { passwordResetTokens, users } from '../db/schema.js';
 import { burnPasswordCheck, hashPassword, verifyPassword } from './password.js';
 import { SessionService } from './session.service.js';
 
@@ -86,7 +87,13 @@ export class AuthService {
       throw new UnauthorizedException(INVALID_LOGIN);
     }
     await this.db.update(users).set({ failedLogins: 0, lockedUntil: null }).where(eq(users.id, u.id));
-    const user: AuthUser = { id: u.id, email: u.email, role: u.role, fullName: u.fullName };
+    const user: AuthUser = {
+      id: u.id,
+      email: u.email,
+      role: u.role,
+      fullName: u.fullName,
+      ...(u.mustChangePassword ? { mustChangePassword: true } : {}),
+    };
     await this.audit.log({ actorId: u.id, action: 'auth.login', entity: 'user', entityId: u.id, ip: meta.ip });
     return { user, session: await this.sessions.create(u.id, meta) };
   }
@@ -96,10 +103,12 @@ export class AuthService {
     if (!u || !(await verifyPassword(u.passwordHash, input.currentPassword))) {
       throw new UnauthorizedException('Mật khẩu hiện tại không đúng');
     }
+    if (input.newPassword === input.currentPassword) throw new BadRequestException('Mật khẩu mới phải khác mật khẩu hiện tại');
     await this.db
       .update(users)
-      .set({ passwordHash: await hashPassword(input.newPassword), updatedAt: new Date() })
+      .set({ passwordHash: await hashPassword(input.newPassword), mustChangePassword: false, updatedAt: new Date() })
       .where(eq(users.id, user.id));
+    await this.db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, user.id)); // lien ket quen mat khau cu het hieu luc
     // Doi mat khau => dang xuat moi thiet bi khac.
     await this.sessions.revokeAllForUser(user.id, currentSessionId);
     await this.audit.log({ actorId: user.id, action: 'auth.change_password', entity: 'user', entityId: user.id, ip: meta.ip });

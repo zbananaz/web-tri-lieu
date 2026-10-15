@@ -8,7 +8,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import type { Role } from '@wtl/shared';
 import type { Request } from 'express';
-import { IS_PUBLIC, ROLES_KEY } from '../common/decorators.js';
+import { ALLOW_PASSWORD_PENDING, IS_PUBLIC, ROLES_KEY } from '../common/decorators.js';
 import { SESSION_COOKIE } from '../common/origin.middleware.js';
 import { SessionService } from './session.service.js';
 
@@ -41,6 +41,16 @@ export class AuthGuard implements CanActivate {
     }
     if (isPublic) return true;
     if (!resolved) throw new UnauthorizedException('Vui lòng đăng nhập');
+    if (resolved.user.mustChangePassword) {
+      const allowed = this.reflector.getAllAndOverride<boolean>(ALLOW_PASSWORD_PENDING, [context.getHandler(), context.getClass()]);
+      if (!allowed) {
+        throw new ForbiddenException({
+          statusCode: 403,
+          message: 'Bạn cần đổi mật khẩu tạm trước khi tiếp tục',
+          code: 'PASSWORD_CHANGE_REQUIRED',
+        });
+      }
+    }
     return true;
   }
 }

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { type Appointment, AppointmentList, BookingPanel } from '@/components/Appointments';
 import { Chat } from '@/components/Chat';
+import { HomeworkClientPanel } from '@/components/CarePanels';
 import { AnswersView, ExpertSummary, type Hotline, HotlineAlert, StatusBadge, Tabs, Timeline } from '@/components/case';
 import { Alert, Card, PageTitle, QueryState } from '@/components/ui';
 import { formatDate, MODE_LABELS } from '@/lib/format';
@@ -41,11 +42,11 @@ export default function MyCasePage() {
       {c.status === 'submitted' && <Alert tone="brand">Hồ sơ đang chờ được xem xét. Chúng tôi sẽ cập nhật tại đây.</Alert>}
       {c.status === 'approved' && <Alert tone="brand">Hồ sơ đã được duyệt. Chúng tôi đang chọn chuyên gia phù hợp cho bạn.</Alert>}
       <Card>
-        <h3 className="mb-3 font-bold">Tiến trình</h3>
+        <h3 className="mb-3 font-semibold">Tiến trình</h3>
         <Timeline events={c.events} />
       </Card>
       <Card>
-        <h3 className="mb-3 font-bold">Câu trả lời của bạn</h3>
+        <h3 className="mb-3 font-semibold">Câu trả lời của bạn</h3>
         <AnswersView answers={c.answers} />
         {c.concerns && <p className="mt-3 text-sm text-muted">Chia sẻ thêm: {c.concerns}</p>}
         {c.preferredMode && <p className="mt-1 text-sm text-muted">Hình thức mong muốn: {MODE_LABELS[c.preferredMode] ?? c.preferredMode}</p>}
@@ -61,12 +62,13 @@ export default function MyCasePage() {
       content: (
         <div className="space-y-4">
           <BookingPanel caseId={c.id} onBooked={() => void appts.reload()} />
-          <h3 className="text-lg font-bold">Lịch hẹn của bạn</h3>
+          <h3 className="text-lg font-semibold">Lịch hẹn của bạn</h3>
           <QueryState loading={appts.loading} error={appts.error} />
           {appts.data && <AppointmentList items={appts.data.appointments} role="client" onChanged={() => void appts.reload()} />}
         </div>
       ),
     });
+    tabs.push({ id: 'homework', label: 'Bài tập', content: <HomeworkClientPanel caseId={c.id} /> });
     tabs.push({
       id: 'chat',
       label: 'Trò chuyện',

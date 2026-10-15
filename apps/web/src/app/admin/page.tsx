@@ -31,7 +31,7 @@ export default function AdminQueuePage() {
     <>
       <PageTitle title="Hàng chờ hồ sơ" />
       {urgent > 0 && (
-        <div role="alert" className="mb-4 rounded-xl bg-danger-50 px-4 py-3 font-semibold text-danger-600">
+        <div role="alert" className="mb-4 rounded-2xl bg-danger-50 px-4 py-3 font-semibold text-danger-600">
           Có {urgent} hồ sơ khẩn cấp đang mở — xử lý trước.
         </div>
       )}
@@ -59,7 +59,7 @@ export default function AdminQueuePage() {
         {q.data?.cases.map((c) => (
           <li key={c.id}>
             <Link href={`/admin/cases/${c.id}`} className="block">
-              <Card className={`flex flex-wrap items-center justify-between gap-3 transition hover:shadow-md ${c.riskLevel === 'urgent' ? 'border-danger-600' : ''}`}>
+              <Card className={`flex flex-wrap items-center justify-between gap-3 transition duration-300 hover:shadow-lift ${c.riskLevel === 'urgent' ? 'border-danger-600' : ''}`}>
                 <div>
                   <p className="font-semibold">{c.clientName}</p>
                   <p className="text-sm text-muted">Gửi lúc {formatDateTime(c.createdAt)}</p>

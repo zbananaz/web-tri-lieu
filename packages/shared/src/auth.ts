@@ -41,4 +41,6 @@ export interface AuthUser {
   email: string;
   role: Role;
   fullName: string;
+  /** Mat khau tam do quan tri cap: moi thao tac khac bi chan cho den khi doi mat khau. */
+  mustChangePassword?: boolean;
 }

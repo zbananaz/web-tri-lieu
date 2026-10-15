@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Be_Vietnam_Pro } from 'next/font/google';
+import { Be_Vietnam_Pro, Fraunces } from 'next/font/google';
 import { AuthProvider } from '@/lib/auth';
 import './globals.css';
 
@@ -7,6 +7,12 @@ const font = Be_Vietnam_Pro({
   variable: '--font-be-vietnam',
   subsets: ['latin', 'vietnamese'],
   weight: ['400', '500', '600', '700'],
+  display: 'swap',
+});
+
+const display = Fraunces({
+  variable: '--font-fraunces',
+  subsets: ['latin', 'vietnamese'],
   display: 'swap',
 });
 
@@ -19,11 +25,11 @@ export const metadata: Metadata = {
   openGraph: { type: 'website', locale: 'vi_VN', siteName: 'Trị Liệu' },
 };
 
-export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#247a70' };
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#f7f2ec' };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="vi" className={font.variable}>
+    <html lang="vi" className={`${font.variable} ${display.variable}`}>
       <body className="flex min-h-dvh flex-col">
         <AuthProvider>{children}</AuthProvider>
       </body>

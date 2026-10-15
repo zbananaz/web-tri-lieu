@@ -81,7 +81,7 @@ export function ExpertProfileForm({
               ['online', 'Trực tuyến'],
               ['in_person', 'Trực tiếp'],
             ].map(([v, l]) => (
-              <label key={v} className="flex min-h-11 items-center gap-2 rounded-xl border border-line px-4">
+              <label key={v} className="flex min-h-11 items-center gap-2 rounded-2xl border border-line px-4">
                 <input type="checkbox" className="size-4 accent-brand-600" checked={modes.includes(v!)} onChange={() => setModes((m) => toggle(m, v!))} />
                 {l}
               </label>

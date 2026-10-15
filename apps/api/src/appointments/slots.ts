@@ -2,6 +2,9 @@
 export const VN_OFFSET_MS = 7 * 60 * 60 * 1000;
 const MINUTE = 60_000;
 
+/** Dat lich phai truoc it nhat ngan nay phut (dung chung cho dat lich va goi y gio trong gan nhat). */
+export const MIN_LEAD_MINUTES = 120;
+
 export interface AvailabilityWindow {
   weekday: number; // 0 = Chu nhat
   startMinute: number;

@@ -42,7 +42,8 @@ export default async function ArticlePage({ params }: PageProps<'/articles/[slug
     description: a.excerpt,
     datePublished: a.publishedAt,
     author: { '@type': 'Person', name: a.authorName },
-    image: a.coverUrl ?? undefined,
+    // Anh tai len la duong dan tuong doi: JSON-LD can URL tuyet doi
+    image: a.coverUrl ? new URL(a.coverUrl, process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000').toString() : undefined,
   };
 
   return (
@@ -54,7 +55,7 @@ export default async function ArticlePage({ params }: PageProps<'/articles/[slug
         <div className="flex flex-wrap gap-1.5">
           {a.tags.map((t) => (
             <Link key={t} href={`/articles?tag=${encodeURIComponent(t)}`}>
-              <Badge tone="brand">{t}</Badge>
+              <Badge tone="brand">{t.replace(/-/g, ' ')}</Badge>
             </Link>
           ))}
         </div>

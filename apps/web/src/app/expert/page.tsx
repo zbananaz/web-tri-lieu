@@ -30,7 +30,7 @@ export default function ExpertCasesPage() {
           return (
             <li key={c.id}>
               <Link href={`/expert/cases/${c.id}`} className="block">
-                <Card className="flex flex-wrap items-center justify-between gap-3 transition hover:shadow-md">
+                <Card className="flex flex-wrap items-center justify-between gap-3 transition duration-300 hover:shadow-lift">
                   <div>
                     <p className="font-semibold">{c.clientName}</p>
                     <p className="text-sm text-muted">{c.assignedAt ? `Phân ngày ${formatDate(c.assignedAt)}` : ''}</p>

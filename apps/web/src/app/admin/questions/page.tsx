@@ -80,7 +80,7 @@ function Editor({ initial, id, nextPosition, onSaved, onCancel }: { initial: Omi
             “Nguy cơ” và “lĩnh vực” chỉ quản trị viên thấy; khách không nhìn thấy để không bị định hướng câu trả lời.
           </p>
           {q.options.map((o, i) => (
-            <div key={i} className="grid gap-3 rounded-xl border border-line p-3 sm:grid-cols-2">
+            <div key={i} className="grid gap-3 rounded-2xl border border-line p-3 sm:grid-cols-2">
               <TextField label="Nhãn hiển thị" value={o.label} onChange={(e) => setOpt(i, { label: e.target.value })} />
               <TextField label="Mã giá trị (không dấu, duy nhất)" value={o.value} onChange={(e) => setOpt(i, { value: e.target.value })} />
               <SelectField label="Nguy cơ" value={o.risk ?? ''} onChange={(e) => setOpt(i, { risk: (e.target.value || undefined) as QuestionOption['risk'] })}>

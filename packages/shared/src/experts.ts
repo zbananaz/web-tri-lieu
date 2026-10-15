@@ -47,6 +47,10 @@ export interface PublicExpert {
   feeVnd: number | null;
   sessionMinutes: number;
   specialties: { slug: string; name: string }[];
+  /** Điểm trung bình các đánh giá đã duyệt; null khi chưa có. */
+  rating: { avg: number; count: number } | null;
+  /** Giờ trống gần nhất (ISO), tính trong 14 ngày tới; null khi không có. */
+  nextSlot: string | null;
 }
 
 export const availabilitySlotSchema = z

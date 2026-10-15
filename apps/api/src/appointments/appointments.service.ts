@@ -18,10 +18,11 @@ import { CasesService } from '../cases/cases.service.js';
 import type { Db } from '../db/client.js';
 import { DB } from '../db/db.module.js';
 import { appointments, expertAvailability, expertProfiles, users } from '../db/schema.js';
-import { computeSlots, windowsOverlap } from './slots.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
+import { MIN_LEAD_MINUTES, computeSlots, windowsOverlap } from './slots.js';
 
 const ACTIVE = ['requested', 'confirmed'] as const;
-const MIN_LEAD_MINUTES = 120;
+
 const MAX_DAYS = 30;
 
 const pgCode = (e: unknown): string | undefined =>
@@ -33,6 +34,7 @@ export class AppointmentsService {
     @Inject(DB) private readonly db: Db,
     private readonly cases: CasesService,
     private readonly audit: AuditService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   // ---------- Gio ranh cua chuyen gia ----------
@@ -117,6 +119,7 @@ export class AppointmentsService {
         })
         .returning({ id: appointments.id });
       await this.audit.log({ actorId: user.id, action: 'appointment.book', entity: 'appointment', entityId: row!.id, ip });
+      await this.notifications.notify(ctx.expertId, 'appointment.requested', 'Có yêu cầu đặt lịch hẹn mới', '/expert/appointments');
       return { id: row!.id, startsAt: startsAt.toISOString(), endsAt: endsAt.toISOString(), status: 'requested' as const };
     } catch (e) {
       // Rang buoc EXCLUDE o DB la lop chong trung lich cuoi cung (hai nguoi dat cung luc).
@@ -141,6 +144,7 @@ export class AppointmentsService {
       .set({ status: 'confirmed', meetingLink: meetingLink ?? a.meetingLink, updatedAt: new Date() })
       .where(eq(appointments.id, id));
     await this.audit.log({ actorId: user.id, action: 'appointment.confirm', entity: 'appointment', entityId: id, ip });
+    await this.notifications.notify(a.clientId, 'appointment.confirmed', 'Lịch hẹn của bạn đã được xác nhận', '/me/appointments');
     return { id, status: 'confirmed' as const };
   }
 
@@ -149,6 +153,11 @@ export class AppointmentsService {
     if (!ACTIVE.includes(a.status as (typeof ACTIVE)[number])) throw new ConflictException('Không thể hủy lịch hẹn này');
     await this.db.update(appointments).set({ status: 'cancelled', updatedAt: new Date() }).where(eq(appointments.id, id));
     await this.audit.log({ actorId: user.id, action: 'appointment.cancel', entity: 'appointment', entityId: id, ip });
+    // Bao cho ben con lai (nguoi huy khong can tu nhan thong bao)
+    const otherParty = user.id === a.clientId ? a.expertId : a.clientId;
+    if (otherParty !== user.id) {
+      await this.notifications.notify(otherParty, 'appointment.cancelled', 'Một lịch hẹn đã bị hủy', a.clientId === otherParty ? '/me/appointments' : '/expert/appointments');
+    }
     return { id, status: 'cancelled' as const };
   }
 

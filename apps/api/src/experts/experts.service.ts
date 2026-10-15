@@ -1,11 +1,14 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type { AdminUpdateExpertInput, CreateExpertInput, PublicExpert, UpdateExpertProfileInput } from '@wtl/shared';
-import { and, eq, inArray } from 'drizzle-orm';
+import type { AdminUpdateExpertInput, CreateExpertInput, ExpertQuery, PublicExpert, UpdateExpertProfileInput } from '@wtl/shared';
+import { and, eq, gt, inArray, sql } from 'drizzle-orm';
 import { AuditService } from '../audit/audit.service.js';
 import { hashPassword } from '../auth/password.js';
 import type { Db } from '../db/client.js';
 import { DB } from '../db/db.module.js';
-import { expertProfiles, expertSpecialties, specialties, users } from '../db/schema.js';
+import { MIN_LEAD_MINUTES, computeSlots } from '../appointments/slots.js';
+import { appointments, expertAvailability, expertProfiles, expertSpecialties, reviews, specialties, users } from '../db/schema.js';
+
+const NEXT_SLOT_DAYS = 14;
 
 type ProfileRow = typeof expertProfiles.$inferSelect;
 
@@ -36,10 +39,53 @@ export class ExpertsService {
     return map;
   }
 
+  /** Diem trung binh danh gia DA DUYET (mot truy van cho ca danh sach). */
+  private async ratingMap(expertIds: string[]): Promise<Map<string, { avg: number; count: number }>> {
+    const map = new Map<string, { avg: number; count: number }>();
+    if (expertIds.length === 0) return map;
+    const rows = await this.db
+      .select({
+        expertId: reviews.expertId,
+        avg: sql<number>`round(avg(${reviews.rating})::numeric, 1)::float`,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(reviews)
+      .where(and(inArray(reviews.expertId, expertIds), eq(reviews.status, 'published')))
+      .groupBy(reviews.expertId);
+    for (const r of rows) map.set(r.expertId, { avg: r.avg, count: r.count });
+    return map;
+  }
+
+  /** Gio trong gan nhat trong NEXT_SLOT_DAYS ngay: 2 truy van chung cho ca danh sach, khong truy van theo tung nguoi. */
+  private async nextSlotMap(profiles: { id: string; sessionMinutes: number }[]): Promise<Map<string, Date>> {
+    const map = new Map<string, Date>();
+    if (profiles.length === 0) return map;
+    const ids = profiles.map((p) => p.id);
+    const now = new Date();
+    const windows = await this.db.select().from(expertAvailability).where(inArray(expertAvailability.expertId, ids));
+    const busy = await this.db
+      .select({ expertId: appointments.expertId, start: appointments.startsAt, end: appointments.endsAt })
+      .from(appointments)
+      .where(and(inArray(appointments.expertId, ids), inArray(appointments.status, ['requested', 'confirmed']), gt(appointments.endsAt, now)));
+    for (const p of profiles) {
+      const slots = computeSlots({
+        windows: windows.filter((w) => w.expertId === p.id),
+        sessionMinutes: p.sessionMinutes,
+        busy: busy.filter((b) => b.expertId === p.id),
+        now,
+        days: NEXT_SLOT_DAYS,
+        minLeadMinutes: MIN_LEAD_MINUTES,
+      });
+      if (slots[0]) map.set(p.id, slots[0]);
+    }
+    return map;
+  }
+
   private toPublic(
     user: { id: string; fullName: string },
     p: ProfileRow,
     specs: { slug: string; name: string }[] | undefined,
+    extra: { rating?: { avg: number; count: number }; nextSlot?: Date } = {},
   ): PublicExpert {
     return {
       id: user.id,
@@ -54,19 +100,48 @@ export class ExpertsService {
       feeVnd: p.feeVnd,
       sessionMinutes: p.sessionMinutes,
       specialties: specs ?? [],
+      rating: extra.rating ?? null,
+      nextSlot: extra.nextSlot?.toISOString() ?? null,
     };
   }
 
-  /** Danh sach cong khai: chi chuyen gia dang hoat dong. Khong lo email/SDT. */
-  async listPublic(): Promise<PublicExpert[]> {
+  /**
+   * Danh sach cong khai: chi chuyen gia dang hoat dong. Khong lo email/SDT.
+   * Loc (ten, chuyen mon, hinh thuc, ngon ngu, muc phi toi da) va sap xep (ten, gio trong som nhat, danh gia) o may chu.
+   * `maxFee`: chuyen gia chua cong bo phi bi loai khi co loc phi.
+   */
+  async listPublic(query: Partial<ExpertQuery> = {}): Promise<PublicExpert[]> {
     const rows = await this.db
       .select({ user: { id: users.id, fullName: users.fullName }, profile: expertProfiles })
       .from(expertProfiles)
       .innerJoin(users, eq(users.id, expertProfiles.userId))
       .where(and(eq(expertProfiles.active, true), eq(users.status, 'active'), eq(users.role, 'expert')))
       .orderBy(users.fullName);
-    const specs = await this.specialtyMap(rows.map((r) => r.user.id));
-    return rows.map((r) => this.toPublic(r.user, r.profile, specs.get(r.user.id)));
+    const ids = rows.map((r) => r.user.id);
+    const [specs, ratings, slots] = await Promise.all([
+      this.specialtyMap(ids),
+      this.ratingMap(ids),
+      this.nextSlotMap(rows.map((r) => ({ id: r.user.id, sessionMinutes: r.profile.sessionMinutes }))),
+    ]);
+    const q = query.q?.toLowerCase();
+    const lang = query.language?.toLowerCase();
+    const list = rows
+      .filter((r) => {
+        const sp = specs.get(r.user.id) ?? [];
+        if (q && !`${r.user.fullName} ${r.profile.headline} ${r.profile.bio} ${sp.map((s) => s.name).join(' ')}`.toLowerCase().includes(q)) return false;
+        if (query.specialty && !sp.some((s) => s.slug === query.specialty)) return false;
+        if (query.mode && !r.profile.modes.includes(query.mode)) return false;
+        if (lang && !r.profile.languages.some((l) => l.toLowerCase() === lang)) return false;
+        if (query.maxFee !== undefined && (r.profile.feeVnd === null || r.profile.feeVnd > query.maxFee)) return false;
+        return true;
+      })
+      .map((r) => this.toPublic(r.user, r.profile, specs.get(r.user.id), { rating: ratings.get(r.user.id), nextSlot: slots.get(r.user.id) }));
+    if (query.sort === 'soonest') {
+      list.sort((a, b) => (a.nextSlot ?? '9').localeCompare(b.nextSlot ?? '9') || a.fullName.localeCompare(b.fullName, 'vi'));
+    } else if (query.sort === 'rating') {
+      list.sort((a, b) => (b.rating?.avg ?? 0) - (a.rating?.avg ?? 0) || (b.rating?.count ?? 0) - (a.rating?.count ?? 0));
+    }
+    return list;
   }
 
   async getPublic(id: string): Promise<PublicExpert> {

@@ -13,6 +13,7 @@ import {
   type RiskLevel,
   type SubmitScreeningInput,
   type TransitionInput,
+  CHAT_OPEN_STATUSES,
   EXPERT_VISIBLE_STATUSES,
   OPEN_CASE_STATUSES,
   canTransition,
@@ -25,6 +26,7 @@ import type { Db } from '../db/client.js';
 import { DB } from '../db/db.module.js';
 import { caseEvents, cases, expertProfiles, users } from '../db/schema.js';
 import { ExpertsService } from '../experts/experts.service.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 import { evaluateAnswers } from './evaluate-answers.js';
 import { ScreeningService } from './screening.service.js';
 
@@ -44,6 +46,7 @@ export class CasesService {
     private readonly audit: AuditService,
     private readonly screening: ScreeningService,
     private readonly experts: ExpertsService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   hotlines() {
@@ -174,6 +177,19 @@ export class CasesService {
     return c;
   }
 
+  /**
+   * Chi hai ben cua ca: khach so huu ca, hoac chuyen gia dang phu trach (trong cac trang thai cho phep).
+   * Quan tri vien KHONG qua cua nay: nhat ky tam trang, bai tap, ghi chu la noi dung rieng tu giua khach va chuyen gia.
+   */
+  async assertParty(user: AuthUser, id: string, expertStatuses: readonly CaseStatus[] = CHAT_OPEN_STATUSES): Promise<CaseRow> {
+    const c = await this.loadAccessible(this.db, user, id);
+    const ok =
+      (user.role === 'client' && c.clientId === user.id) ||
+      (user.role === 'expert' && c.assignedExpertId === user.id && expertStatuses.includes(c.status));
+    if (!ok) throw new NotFoundException('Không tìm thấy yêu cầu');
+    return c;
+  }
+
   /** Kiem tra quyen truy cap ca cho cac module khac (lich hen, chat). */
   async assertAccess(user: AuthUser, id: string): Promise<CaseRow> {
     return this.loadAccessible(this.db, user, id);
@@ -293,7 +309,7 @@ export class CasesService {
 
       await tx.update(cases).set(patch).where(eq(cases.id, c.id));
       await tx.insert(caseEvents).values({ caseId: c.id, actorId: user.id, fromStatus: c.status, toStatus: to, note: note ?? null });
-      return { from: c.status, to, expertId: input.expertId };
+      return { from: c.status, to, expertId: input.expertId, clientId: c.clientId };
     });
     await this.audit.log({
       actorId: user.id,
@@ -303,7 +319,22 @@ export class CasesService {
       ip,
       meta: { from: result.from, to: result.to, ...(result.expertId ? { expertId: result.expertId } : {}) },
     });
+    await this.notifyTransition(id, result);
     return { id, status: result.to };
+  }
+
+  private async notifyTransition(id: string, r: { from: CaseStatus; to: CaseStatus; expertId?: string; clientId: string }) {
+    const mine = `/me/cases/${id}`;
+    if (r.to === 'approved' && r.from === 'submitted') {
+      await this.notifications.notify(r.clientId, 'case.approved', 'Hồ sơ của bạn đã được duyệt, đang chờ phân chuyên gia', mine);
+    } else if (r.to === 'rejected') {
+      await this.notifications.notify(r.clientId, 'case.rejected', 'Hồ sơ của bạn chưa được nhận, xem lý do', mine);
+    } else if (r.to === 'assigned' && r.expertId) {
+      await this.notifications.notify(r.clientId, 'case.assigned', 'Bạn đã được phân chuyên gia, hãy đặt lịch hẹn', mine);
+      await this.notifications.notify(r.expertId, 'case.assigned', 'Bạn có khách mới được phân', `/expert/cases/${id}`);
+    } else if (r.to === 'contacted' || r.to === 'in_treatment' || r.to === 'closed') {
+      await this.notifications.notify(r.clientId, 'case.updated', 'Trạng thái hồ sơ của bạn đã được cập nhật', mine);
+    }
   }
 
   async setAdminNote(user: AuthUser, id: string, note: string, ip?: string | null) {

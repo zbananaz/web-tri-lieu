@@ -11,3 +11,8 @@ playwright-report
 .turbo
 
 .claude/settings.local.json
+
+packages/e2e/shots
+
+# Anh tai len (du lieu nguoi dung, khong dua vao git)
+data/

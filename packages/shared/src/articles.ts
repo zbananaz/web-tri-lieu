@@ -6,12 +6,19 @@ export type ArticleStatus = (typeof ARTICLE_STATUSES)[number];
 
 export const tagSchema = z.string().trim().min(1).max(30);
 
+/** Anh da tai len may chu nay (ten file ngau nhien, do API tao). */
+export const UPLOAD_URL_PATTERN = /^\/api\/uploads\/[a-f0-9]{32}\.(?:png|jpg|webp)$/;
+export const coverUrlSchema = z.union([
+  httpUrlSchema,
+  z.string().regex(UPLOAD_URL_PATTERN, 'Ảnh không hợp lệ'),
+]);
+
 export const articleInputSchema = z.object({
   title: z.string().trim().min(3, 'Tiêu đề quá ngắn').max(200),
   excerpt: z.string().trim().max(400).default(''),
   /** HTML tho tu trinh soan thao; may chu luon lam sach lai truoc khi luu. */
   contentHtml: z.string().min(1, 'Nội dung trống').max(200_000),
-  coverUrl: httpUrlSchema.nullish(),
+  coverUrl: coverUrlSchema.nullish(),
   tags: z.array(tagSchema).max(8).default([]),
   slug: z
     .string()

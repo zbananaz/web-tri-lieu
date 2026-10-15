@@ -1,11 +1,13 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query, Req } from '@nestjs/common';
 import {
   type AdminUpdateExpertInput,
   type AuthUser,
   type CreateExpertInput,
+  type ExpertQuery,
   type UpdateExpertProfileInput,
   adminUpdateExpertSchema,
   createExpertSchema,
+  expertQuerySchema,
   updateExpertProfileSchema,
 } from '@wtl/shared';
 import type { Request } from 'express';
@@ -25,8 +27,8 @@ export class ExpertsController {
 
   @Public()
   @Get('experts')
-  list() {
-    return this.experts.listPublic().then((experts) => ({ experts }));
+  list(@Query(new ZodPipe(expertQuerySchema)) query: ExpertQuery) {
+    return this.experts.listPublic(query).then((experts) => ({ experts }));
   }
 
   @Roles('expert')

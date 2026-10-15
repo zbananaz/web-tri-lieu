@@ -2,10 +2,12 @@
 
 import { type FormEvent, useState } from 'react';
 import { api, errorMessage } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
 import { fieldErrors } from '@/lib/forms';
 import { Alert, Button, Card, TextField } from './ui';
 
 export function ChangePassword() {
+  const { refresh } = useAuth();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fields, setFields] = useState<Record<string, string>>({});
@@ -23,6 +25,7 @@ export function ChangePassword() {
       await api('/auth/change-password', { body: { currentPassword: String(f.get('currentPassword')), newPassword: String(f.get('newPassword')) } });
       form.reset();
       setDone(true);
+      await refresh(); // bo co "phai doi mat khau" neu dang dung mat khau tam
     } catch (err) {
       setFields(fieldErrors(err));
       setError(errorMessage(err));

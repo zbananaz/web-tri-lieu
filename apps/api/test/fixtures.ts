@@ -78,3 +78,15 @@ export const transition = (agent: Agent, caseId: string, body: object): Promise<
   agent.post(`/api/cases/${caseId}/transition`).set('Origin', ORIGIN).send(body);
 
 export { request };
+
+/** Chen thang mot lich hen da hoan thanh (bo qua quy trinh dat lich) de thu danh gia. */
+export async function insertCompletedAppointment(app: NestExpressApplication, caseId: string, expertId: string, clientId: string) {
+  const { appointments } = await import('../src/db/schema.js');
+  const db = app.get<Db>(DB);
+  const startsAt = new Date(Date.now() - 2 * 3_600_000);
+  const [row] = await db
+    .insert(appointments)
+    .values({ caseId, expertId, clientId, startsAt, endsAt: new Date(startsAt.getTime() + 50 * 60_000), status: 'completed' })
+    .returning({ id: appointments.id });
+  return row!.id;
+}

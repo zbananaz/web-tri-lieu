@@ -38,7 +38,7 @@ export default function MyCasesPage() {
         {cases.map((c) => (
           <li key={c.id}>
             <Link href={`/me/cases/${c.id}`} className="block">
-              <Card className="flex flex-wrap items-center justify-between gap-3 transition hover:shadow-md">
+              <Card className="flex flex-wrap items-center justify-between gap-3 transition duration-300 hover:shadow-lift">
                 <div>
                   <p className="font-semibold">Hồ sơ ngày {formatDate(c.createdAt)}</p>
                   <p className="text-sm text-muted">{c.expert ? `Chuyên gia: ${c.expert.fullName}` : 'Chưa phân chuyên gia'}</p>

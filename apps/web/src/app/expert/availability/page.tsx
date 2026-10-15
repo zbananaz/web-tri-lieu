@@ -88,12 +88,12 @@ export default function AvailabilityPage() {
                   <label className="sr-only" htmlFor={`s-${d}-${i}`}>
                     Từ
                   </label>
-                  <input id={`s-${d}-${i}`} type="time" value={r.start} onChange={(e) => update(d, i, { start: e.target.value })} className="min-h-11 rounded-xl border border-line px-3" />
+                  <input id={`s-${d}-${i}`} type="time" value={r.start} onChange={(e) => update(d, i, { start: e.target.value })} className="min-h-11 rounded-2xl border border-line px-3" />
                   <span aria-hidden>→</span>
                   <label className="sr-only" htmlFor={`e-${d}-${i}`}>
                     Đến
                   </label>
-                  <input id={`e-${d}-${i}`} type="time" value={r.end} onChange={(e) => update(d, i, { end: e.target.value })} className="min-h-11 rounded-xl border border-line px-3" />
+                  <input id={`e-${d}-${i}`} type="time" value={r.end} onChange={(e) => update(d, i, { end: e.target.value })} className="min-h-11 rounded-2xl border border-line px-3" />
                   <Button variant="ghost" onClick={() => remove(d, i)} aria-label={`Xóa khung giờ ${i + 1} của ${WEEKDAY_LABELS[d]}`}>
                     Xóa
                   </Button>

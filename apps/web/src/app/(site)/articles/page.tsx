@@ -45,7 +45,7 @@ export default async function ArticlesPage({ searchParams }: PageProps<'/article
       {pages > 1 && (
         <nav aria-label="Phân trang" className="mt-8 flex items-center justify-center gap-3 text-sm">
           {page > 1 && (
-            <Link href={link(page - 1)} className="rounded-xl border border-line bg-surface px-4 py-2 font-medium hover:bg-brand-50">
+            <Link href={link(page - 1)} className="rounded-2xl border border-line bg-surface px-4 py-2 font-medium hover:bg-brand-50">
               ← Trang trước
             </Link>
           )}
@@ -53,7 +53,7 @@ export default async function ArticlesPage({ searchParams }: PageProps<'/article
             Trang {page}/{pages}
           </span>
           {page < pages && (
-            <Link href={link(page + 1)} className="rounded-xl border border-line bg-surface px-4 py-2 font-medium hover:bg-brand-50">
+            <Link href={link(page + 1)} className="rounded-2xl border border-line bg-surface px-4 py-2 font-medium hover:bg-brand-50">
               Trang sau →
             </Link>
           )}

@@ -54,7 +54,7 @@ export function TransitionPanel({
 
   return (
     <Card className="space-y-3">
-      <h3 className="font-bold">Cập nhật trạng thái</h3>
+      <h3 className="font-semibold">Cập nhật trạng thái</h3>
       <TextArea label="Ghi chú (không bắt buộc)" rows={2} maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} />
       {error && <Alert>{error}</Alert>}
       <div className="flex flex-wrap gap-2">

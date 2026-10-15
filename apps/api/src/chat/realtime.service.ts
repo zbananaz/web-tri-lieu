@@ -46,7 +46,8 @@ export class RealtimeService implements OnApplicationBootstrap, OnApplicationShu
         const cookieToken = parseCookie(socket.handshake.headers.cookie ?? '')[SESSION_COOKIE];
         const token = bearer ?? cookieToken;
         const resolved = token ? await this.sessions.resolve(token) : null;
-        if (!resolved) return next(new Error('unauthorized'));
+        // Mat khau tam chua doi thi khong duoc nhan tin realtime (giong chan o AuthGuard cho HTTP)
+        if (!resolved || resolved.user.mustChangePassword) return next(new Error('unauthorized'));
         (socket.data as SocketData).user = resolved.user;
         next();
       } catch {

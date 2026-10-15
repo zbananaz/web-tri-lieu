@@ -8,6 +8,7 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
       nav={[
         { href: '/admin', label: 'Hàng chờ hồ sơ', exact: true },
         { href: '/admin/appointments', label: 'Lịch hẹn' },
+        { href: '/admin/reviews', label: 'Đánh giá' },
         { href: '/admin/experts', label: 'Chuyên gia' },
         { href: '/admin/questions', label: 'Câu hỏi sàng lọc' },
         { href: '/admin/articles', label: 'Bài viết' },

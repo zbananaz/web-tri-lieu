@@ -39,6 +39,11 @@ function LoginForm() {
         <Button type="submit" loading={busy} className="w-full">
           Đăng nhập
         </Button>
+        <p className="text-center text-sm">
+          <Link href="/forgot-password" className="font-semibold text-brand-700 hover:underline">
+            Quên mật khẩu?
+          </Link>
+        </p>
       </form>
       <p className="mt-5 text-center text-sm text-muted">
         Chưa có tài khoản?{' '}

@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation';
 import { type Appointment, AppointmentList } from '@/components/Appointments';
 import { Chat } from '@/components/Chat';
 import { AnswersView, StatusBadge, Tabs, Timeline } from '@/components/case';
+import { ClientTrackingPanel, HomeworkExpertPanel, SessionNotesPanel } from '@/components/CarePanels';
 import { TransitionPanel } from '@/components/Transitions';
 import { Alert, Badge, Card, PageTitle, QueryState } from '@/components/ui';
 import { formatDate, MODE_LABELS, riskTone } from '@/lib/format';
@@ -42,7 +43,7 @@ export default function ExpertCasePage() {
         </Alert>
       )}
       <Card>
-        <h3 className="mb-3 font-bold">Thông tin liên hệ</h3>
+        <h3 className="mb-3 font-semibold">Thông tin liên hệ</h3>
         <dl className="grid gap-3 sm:grid-cols-3">
           <div>
             <dt className="text-sm text-muted">Họ tên</dt>
@@ -60,13 +61,13 @@ export default function ExpertCasePage() {
         <p className="mt-3 text-xs text-muted">Mỗi lần xem thông tin này đều được ghi nhật ký.</p>
       </Card>
       <Card>
-        <h3 className="mb-3 font-bold">Câu trả lời sàng lọc</h3>
+        <h3 className="mb-3 font-semibold">Câu trả lời sàng lọc</h3>
         <AnswersView answers={c.answers} />
         {c.concerns && <p className="mt-3 text-sm">Khách chia sẻ thêm: {c.concerns}</p>}
         {c.preferredMode && <p className="mt-1 text-sm text-muted">Hình thức mong muốn: {MODE_LABELS[c.preferredMode] ?? c.preferredMode}</p>}
       </Card>
       <Card>
-        <h3 className="mb-3 font-bold">Tiến trình</h3>
+        <h3 className="mb-3 font-semibold">Tiến trình</h3>
         <Timeline events={c.events} />
       </Card>
       <TransitionPanel caseId={c.id} status={c.status} role="expert" onDone={() => void detail.reload()} />
@@ -86,6 +87,9 @@ export default function ExpertCasePage() {
         </>
       ),
     });
+    tabs.push({ id: 'homework', label: 'Bài tập', badge: undefined, content: <HomeworkExpertPanel caseId={c.id} canAssign={chatOpen} /> });
+    if (chatOpen) tabs.push({ id: 'tracking', label: 'Theo dõi', badge: undefined, content: <ClientTrackingPanel caseId={c.id} /> });
+    tabs.push({ id: 'notes', label: 'Ghi chú', badge: undefined, content: <SessionNotesPanel caseId={c.id} /> });
     tabs.push({ id: 'chat', label: 'Trò chuyện', badge: unread.data?.byCase[c.id], content: <Chat caseId={c.id} canSend={chatOpen} peerName={c.client.fullName} /> });
   }
 

@@ -3,24 +3,29 @@ import { Throttle } from '@nestjs/throttler';
 import {
   type AuthUser,
   type ChangePasswordInput,
+  type ForgotPasswordInput,
   type LoginInput,
   type RegisterInput,
+  type ResetPasswordInput,
   changePasswordSchema,
+  forgotPasswordSchema,
   loginSchema,
   registerSchema,
+  resetPasswordSchema,
 } from '@wtl/shared';
 import type { CookieOptions, Request, Response } from 'express';
 import { env } from '../config/env.js';
-import { CurrentUser, Public } from '../common/decorators.js';
+import { AllowPasswordPending, CurrentUser, Public } from '../common/decorators.js';
 import { rateLimit } from '../common/limits.js';
 import { SESSION_COOKIE } from '../common/origin.middleware.js';
 import { ZodPipe } from '../common/zod.pipe.js';
 import { AuthService, type RequestMeta } from './auth.service.js';
+import { PasswordResetService } from './password-reset.service.js';
 import { SessionService } from './session.service.js';
 
 // Nguong gioi han dang nhap/dang ky theo IP. Moi request test deu cung mot IP nen nuoi long o moi truong test;
 // viec chong do mat khau van duoc kiem chung rieng qua co che khoa tai khoan.
-const AUTH_LIMIT = rateLimit(20);
+const AUTH_LIMIT = rateLimit(env.authRateLimitPerMin);
 
 const metaOf = (req: Request): RequestMeta => ({ ip: req.ip, userAgent: req.headers['user-agent'] });
 
@@ -37,6 +42,7 @@ export class AuthController {
   constructor(
     private readonly auth: AuthService,
     private readonly sessions: SessionService,
+    private readonly passwordReset: PasswordResetService,
   ) {}
 
   @Public()
@@ -66,6 +72,24 @@ export class AuthController {
     return { user };
   }
 
+  /** Luon tra 204 ngay (khong doi gui thu xong) de khong lo email nao da dang ky. */
+  @Public()
+  @Throttle({ default: { limit: AUTH_LIMIT, ttl: 60_000 } })
+  @HttpCode(204)
+  @Post('forgot-password')
+  forgotPassword(@Body(new ZodPipe(forgotPasswordSchema)) body: ForgotPasswordInput, @Req() req: Request): void {
+    void this.passwordReset.request(body.email, req.ip);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: AUTH_LIMIT, ttl: 60_000 } })
+  @HttpCode(204)
+  @Post('reset-password')
+  async resetPassword(@Body(new ZodPipe(resetPasswordSchema)) body: ResetPasswordInput, @Req() req: Request): Promise<void> {
+    await this.passwordReset.reset(body, req.ip);
+  }
+
+  @AllowPasswordPending()
   @HttpCode(204)
   @Post('logout')
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<void> {
@@ -73,11 +97,13 @@ export class AuthController {
     res.clearCookie(SESSION_COOKIE, cookieOptions());
   }
 
+  @AllowPasswordPending()
   @Get('me')
   me(@CurrentUser() user: AuthUser) {
     return { user };
   }
 
+  @AllowPasswordPending()
   @HttpCode(204)
   @Post('change-password')
   async changePassword(

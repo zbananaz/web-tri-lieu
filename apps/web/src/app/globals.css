@@ -2,26 +2,42 @@
 
 @theme inline {
   --font-sans: var(--font-be-vietnam), ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
-  --color-bg: #faf8f4;
-  --color-surface: #ffffff;
-  --color-ink: #1f2a2e;
-  --color-muted: #5d6b70;
-  --color-line: #e4e0d8;
-  --color-brand-50: #eef7f5;
-  --color-brand-100: #d6ece8;
-  --color-brand-500: #2f9488;
-  --color-brand-600: #247a70;
-  --color-brand-700: #1c625a;
-  --color-warm-100: #fbeedd;
-  --color-warm-600: #b8610f;
-  --color-danger-50: #fdeeee;
-  --color-danger-600: #c0392b;
-  --color-ok-50: #e9f6ec;
-  --color-ok-600: #25763a;
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  /* Nen: be/yen mach am; chu: nau espresso; nhan: nau dat. Moi cap chu/nen deu >= 4.5:1 */
+  --color-bg: #f7f2ec;
+  --color-surface: #fffdfa;
+  --color-ink: #3a2f28;
+  --color-muted: #6f6258;
+  --color-line: #e6dccf;
+  --color-brand-50: #f6eee5;
+  --color-brand-100: #ecdcca;
+  --color-brand-500: #a67c5b;
+  --color-brand-600: #8a6246;
+  --color-brand-700: #6e4c35;
+  --color-warm-100: #f3e3d0;
+  --color-warm-600: #8f5217;
+  --color-danger-50: #fbeceb;
+  --color-danger-600: #b03a2e;
+  --color-ok-50: #eaf1e6;
+  --color-ok-600: #3f6b34;
+  --shadow-soft: 0 1px 2px rgb(110 76 53 / 0.05), 0 10px 28px -14px rgb(110 76 53 / 0.22);
+  --shadow-lift: 0 2px 4px rgb(110 76 53 / 0.06), 0 18px 36px -16px rgb(110 76 53 / 0.3);
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+h1,
+h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 body {
@@ -32,7 +48,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-brand-500);
+  outline: 2px solid var(--color-brand-700);
   outline-offset: 2px;
 }
 

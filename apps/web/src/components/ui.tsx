@@ -19,7 +19,7 @@ const VARIANTS: Record<Variant, string> = {
   danger: 'bg-danger-600 text-white hover:opacity-90 disabled:opacity-50',
 };
 const base =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed';
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition duration-200 active:scale-[0.98] disabled:cursor-not-allowed';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
@@ -86,7 +86,7 @@ export function Field({
 }
 
 const control =
-  'w-full min-h-11 rounded-xl border border-line bg-surface px-3.5 py-2 text-base text-ink placeholder:text-muted/70 focus:border-brand-500 disabled:opacity-60';
+  'w-full min-h-11 rounded-2xl border border-line bg-surface px-3.5 py-2 text-base text-ink placeholder:text-muted/70 focus:border-brand-500 disabled:opacity-60';
 
 export function TextField({
   label,
@@ -134,7 +134,7 @@ export function SelectField({
 
 // ---------- Hien thi ----------
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cx('rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-6', className)}>{children}</div>;
+  return <div className={cx('rounded-3xl border border-line/70 bg-surface p-5 shadow-soft sm:p-7', className)}>{children}</div>;
 }
 
 type Tone = 'neutral' | 'brand' | 'warm' | 'danger' | 'ok';
@@ -151,7 +151,7 @@ export function Badge({ tone = 'neutral', children }: { tone?: Tone; children: R
 
 export function Alert({ tone = 'danger', children }: { tone?: 'danger' | 'ok' | 'warm' | 'brand'; children: ReactNode }) {
   return (
-    <div role={tone === 'danger' ? 'alert' : 'status'} className={cx('rounded-xl px-4 py-3 text-sm', TONES[tone])}>
+    <div role={tone === 'danger' ? 'alert' : 'status'} className={cx('rounded-2xl px-4 py-3 text-sm', TONES[tone])}>
       {children}
     </div>
   );
@@ -176,13 +176,13 @@ export function Loading() {
 }
 
 export function Empty({ children }: { children: ReactNode }) {
-  return <div className="rounded-2xl border border-dashed border-line px-4 py-10 text-center text-muted">{children}</div>;
+  return <div className="rounded-3xl border border-dashed border-brand-500/40 bg-brand-50/50 px-4 py-10 text-center text-muted">{children}</div>;
 }
 
 export function PageTitle({ title, children }: { title: string; children?: ReactNode }) {
   return (
     <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-      <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
+      <h1 className="text-2xl sm:text-3xl">{title}</h1>
       {children}
     </div>
   );

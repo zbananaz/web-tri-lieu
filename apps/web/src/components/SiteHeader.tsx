@@ -4,18 +4,21 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { HOME_BY_ROLE, useAuth } from '@/lib/auth';
+import { LeafMark } from './LeafMark';
+import { NotificationBell } from './NotificationBell';
 import { Button, LinkButton } from './ui';
 
 const LINKS = [
   { href: '/experts', label: 'Chuyên gia' },
   { href: '/articles', label: 'Bài viết' },
+  { href: '/tu-danh-gia', label: 'Tự đánh giá' },
 ];
 
 export function Logo() {
   return (
-    <Link href="/" className="flex items-center gap-2 text-lg font-bold text-brand-700">
-      <span aria-hidden className="grid size-8 place-items-center rounded-xl bg-brand-600 text-white">
-        ♡
+    <Link href="/" className="flex items-center gap-2.5 font-[family-name:var(--font-display)] text-xl font-semibold text-brand-700">
+      <span aria-hidden className="grid size-9 place-items-center rounded-full bg-brand-600 text-brand-50">
+        <LeafMark className="size-5" />
       </span>
       Trị Liệu
     </Link>
@@ -57,16 +60,19 @@ export function SiteHeader() {
         <Logo />
         <nav aria-label="Chính" className="hidden items-center gap-1 md:flex">
           {LINKS.map((l) => (
-            <Link key={l.href} href={l.href} className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-brand-50">
+            <Link key={l.href} href={l.href} className="rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-brand-100/60">
               {l.label}
             </Link>
           ))}
           <span className="mx-2 h-6 w-px bg-line" />
+          {user && <NotificationBell />}
           {authArea}
         </nav>
+        <div className="flex items-center gap-2 md:hidden">
+          {user && <NotificationBell />}
         <button
           type="button"
-          className="grid size-11 place-items-center rounded-xl border border-line md:hidden"
+          className="grid size-11 place-items-center rounded-full border border-line"
           aria-expanded={open}
           aria-controls="mobile-menu"
           aria-label={open ? 'Đóng menu' : 'Mở menu'}
@@ -76,11 +82,12 @@ export function SiteHeader() {
             {open ? '✕' : '☰'}
           </span>
         </button>
+        </div>
       </div>
       {open && (
         <nav id="mobile-menu" aria-label="Di động" className="flex flex-col gap-2 border-t border-line bg-bg px-4 py-4 md:hidden">
           {LINKS.map((l) => (
-            <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 font-medium hover:bg-brand-50">
+            <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="rounded-xl px-3 py-3 font-medium hover:bg-brand-50">
               {l.label}
             </Link>
           ))}

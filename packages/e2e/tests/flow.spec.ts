@@ -77,7 +77,8 @@ test('khach dat lich, chuyen gia xac nhan, hai ben nhan tin', async ({ page, bro
   // Khach mo san khung chat; tin cua chuyen gia phai den ngay qua socket (khong reload, nhanh hon chu ky hoi 8s)
   await page.goto(`/me/cases/${caseId}`);
   await page.getByRole('tab', { name: 'Trò chuyện' }).click();
-  await page.waitForLoadState('networkidle');
+  await expect(page.locator('#chat-input')).toBeVisible();
+  await page.waitForTimeout(1500); // cho socket kip ket noi truoc khi chuyen gia gui
   await ep.goto(`/expert/cases/${caseId}`);
   await ep.getByRole('tab', { name: 'Trò chuyện' }).click();
   await ep.locator('#chat-input').fill('Xin chao tu chuyen gia');

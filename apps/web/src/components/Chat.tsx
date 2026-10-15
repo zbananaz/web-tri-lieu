@@ -136,7 +136,7 @@ export function Chat({ caseId, canSend, peerName }: { caseId: string; canSend: b
                 void send();
               }
             }}
-            className="max-h-32 min-h-11 flex-1 resize-none rounded-xl border border-line px-3.5 py-2.5 focus:border-brand-500"
+            className="max-h-32 min-h-11 flex-1 resize-none rounded-2xl border border-line px-3.5 py-2.5 focus:border-brand-500"
           />
           <Button type="submit" loading={sending} disabled={!text.trim()}>
             Gửi

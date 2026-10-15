@@ -22,10 +22,87 @@ export interface Appointment {
 }
 
 /** Danh sach lich hen kem thao tac theo vai tro. */
+const REVIEW_LABELS = { pending: 'Đang chờ duyệt', published: 'Đã đăng', hidden: 'Đã ẩn' } as const;
+
+interface MyReview {
+  appointmentId: string;
+  rating: number;
+  comment: string;
+  status: keyof typeof REVIEW_LABELS;
+}
+
+/** Khach danh gia buoi da hoan thanh: chon sao, nhan xet tuy chon, cho quan tri duyet truoc khi hien cong khai. */
+function ReviewBox({ appointmentId, mine, onSaved }: { appointmentId: string; mine?: MyReview; onSaved: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (mine) {
+    return (
+      <p className="text-sm text-muted">
+        Bạn đã đánh giá {mine.rating}/5 sao · {REVIEW_LABELS[mine.status]}
+      </p>
+    );
+  }
+  if (!open) {
+    return (
+      <Button variant="secondary" onClick={() => setOpen(true)}>
+        Đánh giá buổi hẹn
+      </Button>
+    );
+  }
+  const submit = async () => {
+    if (!rating) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await api(`/appointments/${appointmentId}/review`, { body: { rating, comment: comment.trim() } });
+      onSaved();
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="w-full space-y-3 rounded-2xl bg-brand-50 p-4">
+      <p className="font-semibold">Buổi hẹn này thế nào?</p>
+      <div role="radiogroup" aria-label="Số sao" className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button
+            key={n}
+            type="button"
+            role="radio"
+            aria-checked={rating === n}
+            aria-label={`${n} sao`}
+            onClick={() => setRating(n)}
+            className={`grid size-11 place-items-center rounded-full border text-xl ${rating >= n ? 'border-warm-600 bg-warm-100 text-warm-600' : 'border-line bg-surface text-muted'}`}
+          >
+            ★
+          </button>
+        ))}
+      </div>
+      <TextArea label="Nhận xét (không bắt buộc)" rows={3} maxLength={1000} value={comment} onChange={(e) => setComment(e.target.value)} hint="Đánh giá được quản trị viên duyệt trước khi hiển thị, và không kèm tên của bạn." />
+      {error && <Alert>{error}</Alert>}
+      <div className="flex gap-2">
+        <Button onClick={submit} loading={busy} disabled={!rating}>
+          Gửi đánh giá
+        </Button>
+        <Button variant="ghost" onClick={() => setOpen(false)}>
+          Để sau
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function AppointmentList({ items, role, onChanged }: { items: Appointment[]; role: Role; onChanged: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [link, setLink] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
+  const reviews = useQuery<{ reviews: MyReview[] }>(role === 'client' ? '/reviews/mine' : null);
 
   const act = async (id: string, action: 'confirm' | 'cancel' | 'complete') => {
     setBusy(id + action);
@@ -77,6 +154,9 @@ export function AppointmentList({ items, role, onChanged }: { items: Appointment
               </div>
             )}
             <div className="flex flex-wrap gap-2">
+              {role === 'client' && a.status === 'completed' && reviews.data && (
+                <ReviewBox appointmentId={a.id} mine={reviews.data.reviews.find((r) => r.appointmentId === a.id)} onSaved={() => void reviews.reload()} />
+              )}
               {role === 'expert' && a.status === 'confirmed' && past && (
                 <Button variant="secondary" loading={busy === a.id + 'complete'} onClick={() => act(a.id, 'complete')}>
                   Đánh dấu hoàn thành
@@ -152,7 +232,7 @@ export function BookingPanel({ caseId, onBooked }: { caseId: string; onBooked: (
   return (
     <Card className="space-y-4">
       <div>
-        <h3 className="text-lg font-bold">Đặt lịch hẹn</h3>
+        <h3 className="text-lg font-semibold">Đặt lịch hẹn</h3>
         <p className="text-sm text-muted">Mỗi buổi {q.data.sessionMinutes} phút. Giờ hiển thị theo giờ Việt Nam.</p>
       </div>
       {days.length === 0 ? (
@@ -169,7 +249,7 @@ export function BookingPanel({ caseId, onBooked }: { caseId: string; onBooked: (
                     type="button"
                     aria-pressed={picked === s}
                     onClick={() => setPicked(s)}
-                    className={`min-h-11 min-w-[4.5rem] rounded-xl border px-3 text-sm font-medium ${picked === s ? 'border-brand-600 bg-brand-600 text-white' : 'border-line bg-surface hover:bg-brand-50'}`}
+                    className={`min-h-11 min-w-[4.5rem] rounded-2xl border px-3 text-sm font-medium ${picked === s ? 'border-brand-600 bg-brand-600 text-white' : 'border-line bg-surface hover:bg-brand-50'}`}
                   >
                     {formatTime(s)}
                   </button>
@@ -180,7 +260,7 @@ export function BookingPanel({ caseId, onBooked }: { caseId: string; onBooked: (
         </div>
       )}
       {picked && (
-        <div className="space-y-3 rounded-xl bg-brand-50 p-4">
+        <div className="space-y-3 rounded-2xl bg-brand-50 p-4">
           <p className="font-semibold">Bạn chọn: {formatDateTime(picked)}</p>
           <SelectField label="Hình thức" value={effectiveMode} onChange={(e) => setMode(e.target.value)}>
             {modes.map((m) => (

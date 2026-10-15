@@ -2,8 +2,8 @@
 
 import type { ArticleDetail } from '@wtl/shared';
 import { useRouter } from 'next/navigation';
-import { type FormEvent, useRef, useState } from 'react';
-import { api, errorMessage } from '@/lib/api';
+import { type ChangeEvent, type FormEvent, useRef, useState } from 'react';
+import { api, errorMessage, uploadImage } from '@/lib/api';
 import { fieldErrors } from '@/lib/forms';
 import { Alert, Badge, Button, Card, TextArea, TextField } from './ui';
 
@@ -27,28 +27,52 @@ export function ArticleEditor({ article }: { article?: ArticleDetail }) {
   const [fields, setFields] = useState<Record<string, string>>({});
   const [saved, setSaved] = useState(false);
   const [status, setStatus] = useState(article?.status ?? 'draft');
+  const [cover, setCover] = useState(article?.coverUrl ?? '');
+  const [uploading, setUploading] = useState<'cover' | 'content' | null>(null);
 
-  const wrap = (before: string, after: string) => {
+  // dropSelection: chen khoi moi o con tro, bo qua doan dang boi den (dung cho anh)
+  const wrap = (before: string, after: string, dropSelection = false) => {
     const el = area.current;
     if (!el) return;
     const { selectionStart: s, selectionEnd: e } = el;
-    const next = html.slice(0, s) + before + html.slice(s, e) + after + html.slice(e);
+    const next = html.slice(0, s) + before + (dropSelection ? '' : html.slice(s, e)) + after + html.slice(dropSelection ? s : e);
     setHtml(next);
     requestAnimationFrame(() => {
       el.focus();
-      el.setSelectionRange(s + before.length, e + before.length);
+      el.setSelectionRange(s + before.length, (dropSelection ? s : e) + before.length);
     });
+  };
+
+  const onPick = async (e: ChangeEvent<HTMLInputElement>, target: 'cover' | 'content') => {
+    const input = e.currentTarget;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    setUploading(target);
+    setError(null);
+    try {
+      const url = await uploadImage(file);
+      if (target === 'cover') {
+        setCover(url);
+      } else {
+        const alt = (window.prompt('Mô tả ngắn cho ảnh (giúp người dùng đọc màn hình; có thể để trống)') ?? '').replace(/["<>]/g, '');
+        wrap(`<figure><img src="${url}" alt="${alt}">`, '</figure>', true);
+      }
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setUploading(null);
+    }
   };
 
   const readForm = (form: HTMLFormElement) => {
     const f = new FormData(form);
     const slug = String(f.get('slug') ?? '').trim();
-    const cover = String(f.get('coverUrl') ?? '').trim();
     return {
       title: String(f.get('title')),
       excerpt: String(f.get('excerpt') ?? ''),
       contentHtml: html,
-      coverUrl: cover || null,
+      coverUrl: cover.trim() || null,
       tags: String(f.get('tags') ?? '')
         .split(',')
         .map((t) => t.trim())
@@ -100,7 +124,17 @@ export function ArticleEditor({ article }: { article?: ArticleDetail }) {
         <TextField label="Tiêu đề" name="title" defaultValue={article?.title} required maxLength={200} error={fields.title} />
         <TextArea label="Tóm tắt (hiển thị ở danh sách)" name="excerpt" rows={2} defaultValue={article?.excerpt} maxLength={400} error={fields.excerpt} />
         <div className="grid gap-4 sm:grid-cols-2">
-          <TextField label="Ảnh bìa (URL https)" name="coverUrl" type="url" defaultValue={article?.coverUrl ?? ''} error={fields.coverUrl} />
+          <div className="space-y-2">
+            <TextField label="Ảnh bìa (URL https hoặc tải lên)" name="coverUrl" type="text" value={cover} onChange={(e) => setCover(e.target.value)} error={fields.coverUrl} />
+            <label className="inline-flex min-h-11 cursor-pointer items-center rounded-xl border border-line px-3 text-sm font-semibold hover:bg-brand-50">
+              {uploading === 'cover' ? 'Đang tải ảnh…' : 'Tải ảnh bìa lên'}
+              <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" disabled={uploading !== null} onChange={(e) => void onPick(e, 'cover')} />
+            </label>
+            {cover.startsWith('/api/uploads/') && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={cover} alt="Ảnh bìa đã chọn" className="max-h-32 rounded-xl border border-line" />
+            )}
+          </div>
           <TextField label="Thẻ (cách nhau bằng dấu phẩy)" name="tags" defaultValue={article?.tags.join(', ')} error={fields.tags} />
         </div>
         <TextField label="Đường dẫn (để trống để tự tạo từ tiêu đề)" name="slug" defaultValue={article?.slug} error={fields.slug} hint="Chỉ gồm chữ thường, số và dấu gạch ngang." />
@@ -109,10 +143,14 @@ export function ArticleEditor({ article }: { article?: ArticleDetail }) {
       <Card className="space-y-3">
         <div className="flex flex-wrap gap-2" role="toolbar" aria-label="Định dạng">
           {TOOLS.map((t) => (
-            <button key={t.label} type="button" title={t.title} onClick={() => wrap(t.before, t.after)} className="min-h-11 rounded-lg border border-line px-3 text-sm font-semibold hover:bg-brand-50">
+            <button key={t.label} type="button" title={t.title} onClick={() => wrap(t.before, t.after)} className="min-h-11 rounded-xl border border-line px-3 text-sm font-semibold hover:bg-brand-50">
               {t.label}
             </button>
           ))}
+          <label className="inline-flex min-h-11 cursor-pointer items-center rounded-xl border border-line px-3 text-sm font-semibold hover:bg-brand-50">
+            {uploading === 'content' ? 'Đang tải ảnh…' : 'Chèn ảnh'}
+            <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" disabled={uploading !== null} onChange={(e) => void onPick(e, 'content')} />
+          </label>
         </div>
         <div className="grid gap-4 lg:grid-cols-2">
           <div>
@@ -125,7 +163,7 @@ export function ArticleEditor({ article }: { article?: ArticleDetail }) {
               value={html}
               onChange={(e) => setHtml(e.target.value)}
               rows={18}
-              className="w-full rounded-xl border border-line bg-surface p-3 font-mono text-sm focus:border-brand-500"
+              className="w-full rounded-2xl border border-line bg-surface p-3 font-mono text-sm focus:border-brand-500"
             />
             {fields.contentHtml && <p className="text-sm text-danger-600">{fields.contentHtml}</p>}
           </div>
@@ -136,7 +174,7 @@ export function ArticleEditor({ article }: { article?: ArticleDetail }) {
               title="Xem trước bài viết"
               sandbox=""
               srcDoc={`<!doctype html><meta charset="utf-8"><base target="_blank"><style>body{font:16px/1.7 system-ui,sans-serif;margin:12px;color:#1f2a2e}img{max-width:100%}blockquote{border-left:4px solid #2f9488;margin:0;padding-left:12px;color:#5d6b70}</style>${html}`}
-              className="h-[26rem] w-full rounded-xl border border-line bg-white"
+              className="h-[26rem] w-full rounded-2xl border border-line bg-white"
             />
           </div>
         </div>

@@ -4,7 +4,7 @@
     {
       "name": "api",
       "runtimeExecutable": "powershell",
-      "runtimeArgs": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ". D:/Project/WebTriLieu/scripts/env.ps1; pnpm --filter '@wtl/api' start:prod"],
+      "runtimeArgs": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ". D:/Project/WebTriLieu/scripts/env.ps1; $env:AUTH_RATE_LIMIT_PER_MIN='300'; pnpm --filter '@wtl/api' start:prod"],
       "port": 4000
     },
     {

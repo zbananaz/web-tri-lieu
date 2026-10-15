@@ -2,6 +2,7 @@
 
 import type { AuthUser, LoginInput, RegisterInput, Role } from '@wtl/shared';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { ForcedPasswordChange } from '@/components/ForcedPasswordChange';
 import { ApiError, api } from './api';
 
 interface AuthState {
@@ -10,6 +11,8 @@ interface AuthState {
   login: (input: LoginInput) => Promise<AuthUser>;
   register: (input: RegisterInput) => Promise<AuthUser>;
   logout: () => Promise<void>;
+  /** Doc lai thong tin nguoi dung tu may chu (vd. sau khi doi mat khau tam). */
+  refresh: () => Promise<void>;
 }
 
 const Ctx = createContext<AuthState | null>(null);
@@ -49,8 +52,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
-  const value = useMemo(() => ({ user, loading, login, register, logout }), [user, loading, login, register, logout]);
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+  const refresh = useCallback(async () => {
+    const r = await api<{ user: AuthUser }>('/auth/me');
+    setUser(r.user);
+  }, []);
+
+  const value = useMemo(() => ({ user, loading, login, register, logout, refresh }), [user, loading, login, register, logout, refresh]);
+  return <Ctx.Provider value={value}>{user?.mustChangePassword ? <ForcedPasswordChange /> : children}</Ctx.Provider>;
 }
 
 export function useAuth(): AuthState {

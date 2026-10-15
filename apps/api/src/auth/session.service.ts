@@ -44,6 +44,7 @@ export class SessionService {
         email: users.email,
         role: users.role,
         fullName: users.fullName,
+        mustChangePassword: users.mustChangePassword,
       })
       .from(sessions)
       .innerJoin(users, eq(users.id, sessions.userId))
@@ -55,7 +56,13 @@ export class SessionService {
     }
     return {
       sessionId: row.sessionId,
-      user: { id: row.id, email: row.email, role: row.role, fullName: row.fullName },
+      user: {
+        id: row.id,
+        email: row.email,
+        role: row.role,
+        fullName: row.fullName,
+        ...(row.mustChangePassword ? { mustChangePassword: true } : {}),
+      },
     };
   }
 

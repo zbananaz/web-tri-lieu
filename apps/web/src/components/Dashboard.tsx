@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { type ReactNode, useEffect } from 'react';
 import { HOME_BY_ROLE, useAuth } from '@/lib/auth';
+import { NotificationBell } from './NotificationBell';
 import { Logo } from './SiteHeader';
 import { Button, Loading } from './ui';
 
@@ -36,9 +37,12 @@ export function Dashboard({ role, title, nav, children }: { role: Role; title: s
   return (
     <div className="flex min-h-dvh flex-col lg:flex-row">
       <aside className="border-b border-line bg-surface lg:sticky lg:top-0 lg:h-dvh lg:w-64 lg:shrink-0 lg:border-b-0 lg:border-r">
-        <div className="flex items-center justify-between px-4 py-3 lg:flex-col lg:items-start lg:gap-1 lg:px-5 lg:py-5">
-          <Logo />
-          <p className="text-sm text-muted">{title}</p>
+        <div className="flex items-center justify-between gap-3 px-4 py-3 lg:px-5 lg:py-5">
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <Logo />
+            <p className="text-sm text-muted">{title}</p>
+          </div>
+          <NotificationBell menuClass="right-0 lg:right-auto lg:left-0" />
         </div>
         <nav aria-label={title} className="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:px-3 lg:pb-0">
           {nav.map((n) => (
@@ -46,7 +50,7 @@ export function Dashboard({ role, title, nav, children }: { role: Role; title: s
               key={n.href}
               href={n.href}
               aria-current={active(n) ? 'page' : undefined}
-              className={`whitespace-nowrap rounded-xl px-3.5 py-2.5 text-sm font-medium ${
+              className={`whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-medium ${
                 active(n) ? 'bg-brand-600 text-white' : 'hover:bg-brand-50'
               }`}
             >

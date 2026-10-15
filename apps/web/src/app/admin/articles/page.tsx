@@ -19,7 +19,7 @@ export default function AdminArticlesPage() {
         {q.data?.articles.map((a) => (
           <li key={a.id}>
             <Link href={`/admin/articles/${a.id}`} className="block">
-              <Card className="flex flex-wrap items-center justify-between gap-3 transition hover:shadow-md">
+              <Card className="flex flex-wrap items-center justify-between gap-3 transition duration-300 hover:shadow-lift">
                 <div className="min-w-0">
                   <p className="truncate font-semibold">{a.title}</p>
                   <p className="text-sm text-muted">

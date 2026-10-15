@@ -8,6 +8,7 @@ export default function MeLayout({ children }: LayoutProps<'/me'>) {
       nav={[
         { href: '/me', label: 'Hồ sơ của tôi', exact: true },
         { href: '/me/appointments', label: 'Lịch hẹn' },
+        { href: '/me/mood', label: 'Nhật ký' },
         { href: '/me/account', label: 'Tài khoản' },
       ]}
     >

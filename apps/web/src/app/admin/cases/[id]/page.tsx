@@ -69,7 +69,7 @@ function AdminActions({ c, onDone }: { c: Detail; onDone: () => void }) {
 
   return (
     <Card className="space-y-4">
-      <h3 className="font-bold">Xử lý hồ sơ</h3>
+      <h3 className="font-semibold">Xử lý hồ sơ</h3>
       {error && <Alert>{error}</Alert>}
 
       {c.status === 'submitted' && (
@@ -94,7 +94,7 @@ function AdminActions({ c, onDone }: { c: Detail; onDone: () => void }) {
               <ul className="space-y-2">
                 {c.suggestions.map((s) => (
                   <li key={s.expertId}>
-                    <label className={`flex min-h-11 cursor-pointer items-start gap-3 rounded-xl border p-3 ${chosen === s.expertId ? 'border-brand-600 bg-brand-50' : 'border-line'}`}>
+                    <label className={`flex min-h-11 cursor-pointer items-start gap-3 rounded-2xl border p-3 ${chosen === s.expertId ? 'border-brand-600 bg-brand-50' : 'border-line'}`}>
                       <input type="radio" name="expert" className="mt-1 size-4 accent-brand-600" checked={chosen === s.expertId} onChange={() => setExpertId(s.expertId)} />
                       <span>
                         <span className="font-semibold">{s.fullName}</span> <span className="text-sm text-muted">· điểm {s.score}</span>
@@ -156,7 +156,7 @@ function AdminNote({ c, onSaved }: { c: Detail; onSaved: () => void }) {
   };
   return (
     <Card className="space-y-3">
-      <h3 className="font-bold">Ghi chú nội bộ</h3>
+      <h3 className="font-semibold">Ghi chú nội bộ</h3>
       <TextArea label="Chỉ quản trị viên thấy" value={text} maxLength={2000} onChange={(e) => setText(e.target.value)} />
       {msg && <Alert tone={msg.ok ? 'ok' : 'danger'}>{msg.text}</Alert>}
       <Button variant="secondary" onClick={save} loading={busy}>
@@ -181,7 +181,7 @@ export default function AdminCasePage() {
       {c.rejectionReason && <Alert tone="warm">Lý do từ chối: {c.rejectionReason}</Alert>}
       <AdminActions c={c} onDone={() => void detail.reload()} />
       <Card>
-        <h3 className="mb-3 font-bold">Khách hàng</h3>
+        <h3 className="mb-3 font-semibold">Khách hàng</h3>
         <dl className="grid gap-3 sm:grid-cols-3">
           <div>
             <dt className="text-sm text-muted">Họ tên</dt>
@@ -199,7 +199,7 @@ export default function AdminCasePage() {
         <p className="mt-3 text-xs text-muted">Mỗi lần xem hồ sơ đều được ghi nhật ký kiểm toán.</p>
       </Card>
       <Card>
-        <h3 className="mb-3 font-bold">Câu trả lời sàng lọc</h3>
+        <h3 className="mb-3 font-semibold">Câu trả lời sàng lọc</h3>
         <dl className="space-y-3">
           {c.answers.map((a) => (
             <div key={a.questionId}>
@@ -216,7 +216,7 @@ export default function AdminCasePage() {
       </Card>
       <AdminNote c={c} onSaved={() => void detail.reload()} />
       <Card>
-        <h3 className="mb-3 font-bold">Tiến trình</h3>
+        <h3 className="mb-3 font-semibold">Tiến trình</h3>
         <Timeline events={c.events} />
       </Card>
     </div>
