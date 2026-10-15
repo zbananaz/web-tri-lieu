@@ -7,7 +7,7 @@ Khách sàng lọc → quản trị duyệt → phân cho chuyên gia → đặt
 - `packages/shared` — schema zod, kiểu dùng chung, bảng chuyển trạng thái hồ sơ
 - `packages/e2e` — Playwright (luồng chính + kiểm tra tràn ngang + phân quyền)
 
-Thiết kế chi tiết: [docs/spec.md](docs/spec.md). Các tính năng Đợt 1 (tìm chuyên gia, tự đánh giá, nhật ký tâm trạng, bài tập, ghi chú, đánh giá, thông báo, quên mật khẩu qua email): [docs/wave1-spec.md](docs/wave1-spec.md).
+Chạy trên máy: [docs/HUONG-DAN-CHAY-LOCAL.md](docs/HUONG-DAN-CHAY-LOCAL.md). Nhật ký làm việc cho các phiên sau: [docs/NHAT-KY-LAM-VIEC.md](docs/NHAT-KY-LAM-VIEC.md) (thêm mục mới sau mỗi việc xong). Thiết kế chi tiết: [docs/spec.md](docs/spec.md). Các tính năng Đợt 1 (tìm chuyên gia, tự đánh giá, nhật ký tâm trạng, bài tập, ghi chú, đánh giá, thông báo, quên mật khẩu qua email): [docs/wave1-spec.md](docs/wave1-spec.md).
 
 ## Tính năng (đối chiếu các web trị liệu tâm lý)
 
