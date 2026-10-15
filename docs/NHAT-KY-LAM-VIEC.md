@@ -20,6 +20,10 @@ Quy ước: **sau mỗi việc làm xong, thêm một mục mới ở đầu dan
 
 ## Nhật ký
 
+### 2026-10-16 — Tạm dừng `/goal`
+- Chủ dự án yêu cầu tạm dừng goal ở đây. Trạng thái: web hoàn chỉnh theo phạm vi hiện tại, không còn việc dở trong code. Phiên sau chỉ cần làm tiếp khi chủ dự án giao việc mới.
+- Việc chờ chủ dự án: điền `SMTP_URL`/`MAIL_FROM` (Brevo) vào `.env` rồi thử "Quên mật khẩu"; quyết định xóa `C:\Users\Admin\AppData\Local\ms-playwright` (701 MB, của dự án khác).
+
 ### 2026-10-16 — Email, tài liệu, kiểm tra ổ C
 - Thêm `apps/api/test/mailer-smtp.e2e-spec.ts`: dựng máy chủ SMTP giả (`smtp-server` + `mailparser`) và kiểm `MailerService` gửi đúng tiêu đề/nội dung tiếng Việt/người gửi/người nhận qua `SMTP_URL`. Tổng test API: 92.
 - Chọn **Brevo** (SMTP miễn phí ~300 thư/ngày) làm dịch vụ email; hướng dẫn nằm trong `.env.example` và README mục 4 phần "Trước khi đưa lên thật". Chưa gửi thử thật vì cần chủ dự án tạo tài khoản và điền `SMTP_URL`, `MAIL_FROM` vào `.env`.
