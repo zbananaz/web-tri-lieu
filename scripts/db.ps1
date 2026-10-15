@@ -1,6 +1,6 @@
 # Dieu khien PostgreSQL cuc bo (khong dung Windows service, khong Docker).
-# Cach dung: .\scripts\db.ps1 init | start | stop | status | reset
-param([Parameter(Mandatory = $true)][ValidateSet('init', 'start', 'stop', 'status', 'reset')][string]$Action)
+# Cach dung: .\scripts\db.ps1 init | start | stop | status | reset | backup
+param([Parameter(Mandatory = $true)][ValidateSet('init', 'start', 'stop', 'status', 'reset', 'backup')][string]$Action)
 . "$PSScriptRoot\env.ps1"
 
 $Port = 54329
@@ -55,6 +55,19 @@ switch ($Action) {
     }
     'stop' { pg_ctl -D $DataDir -m fast stop }
     'status' { pg_ctl -D $DataDir status }
+    'backup' {
+        # Sao luu DB chinh ra D:\Tool\PostgreSQL\backups (dinh dang custom, nen khoi phuc bang pg_restore). Giu 14 ban moi nhat.
+        $pw = Get-DbPassword
+        if (-not $pw) { throw 'Khong doc duoc POSTGRES_PASSWORD trong .env' }
+        $dir = Join-Path $Tool 'PostgreSQL\backups'
+        New-Item -ItemType Directory -Force $dir | Out-Null
+        $file = Join-Path $dir ('webtrilieu-{0:yyyyMMdd-HHmmss}.dump' -f (Get-Date))
+        $env:PGPASSWORD = $pw
+        pg_dump -h 127.0.0.1 -p $Port -U postgres -Fc -f $file webtrilieu
+        if ($LASTEXITCODE -ne 0) { throw "pg_dump that bai ($LASTEXITCODE)" }
+        Get-ChildItem $dir -Filter 'webtrilieu-*.dump' | Sort-Object LastWriteTime -Descending | Select-Object -Skip 14 | Remove-Item -Force
+        Write-Host ("Da sao luu: {0} ({1:N0} KB)" -f $file, ((Get-Item $file).Length / 1KB))
+    }
     'reset' {
         pg_ctl -D $DataDir -m immediate stop 2>$null
         Remove-Item -Recurse -Force $DataDir -ErrorAction SilentlyContinue
