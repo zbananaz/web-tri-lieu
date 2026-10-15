@@ -20,7 +20,7 @@ import { AdminAuditController, AdminUsersController } from './users/admin-users.
 @Module({
   imports: [
     // Gioi han chung 120 request/phut/IP; route nhay cam (dang nhap...) dat nguong rieng bang @Throttle.
-    ThrottlerModule.forRoot([{ ttl: 60_000, limit: env.nodeEnv === 'test' ? 100_000 : 120 }]),
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: env.nodeEnv === 'test' ? 100_000 : env.rateLimitPerMin }]),
     DbModule,
     AuditModule,
     MailModule,

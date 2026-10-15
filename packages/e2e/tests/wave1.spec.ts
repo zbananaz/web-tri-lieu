@@ -45,6 +45,9 @@ test.afterAll(async ({ baseURL }) => {
   }
 });
 
+const noOverflow = async (page: Page, where: string) =>
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), where).toBeLessThanOrEqual(0);
+
 const answer = (page: Page, i: number, choice: number) => page.locator('fieldset').nth(i).locator('input').nth(choice).check();
 
 test('tu danh gia PHQ-9 cho khach vang lai: tinh diem, cau 9 khac 0 thi hien hotline', async ({ page }) => {
@@ -57,7 +60,7 @@ test('tu danh gia PHQ-9 cho khach vang lai: tinh diem, cau 9 khac 0 thi hien hot
   await page.getByRole('button', { name: 'Xem kết quả' }).click();
   await expect(page.getByTestId('assessment-score')).toContainText('0');
   await expect(page.getByText('Nếu bạn có ý nghĩ làm hại bản thân')).toBeHidden();
-  await expect(page.getByText('Đăng nhập').first()).toBeVisible(); // goi y dang nhap de luu
+  await expect(page.getByText(/để lưu kết quả/)).toBeVisible(); // goi y dang nhap de luu
 
   await answer(page, 8, 1); // doi cau 9 -> ket qua cu bi go
   await expect(page.getByTestId('assessment-score')).toBeHidden();
@@ -158,6 +161,8 @@ test('khach ghi nhat ky tam trang va luu ket qua tu danh gia, co chia se', async
   await page.getByLabel(/Ghi chú/).fill('Muc rieng tu cua toi');
   await page.getByRole('button', { name: 'Lưu', exact: true }).click();
   await expect(page.getByText('Muc rieng tu cua toi')).toBeVisible();
+  await expect(page.getByText('Chỉ mình bạn thấy')).toHaveCount(1); // lua chon chia se khong "dinh" sang muc sau
+  await noOverflow(page, '/me/mood');
 
   await page.goto('/tu-danh-gia');
   await page.getByRole('tab', { name: /GAD-7/ }).click();
@@ -174,6 +179,7 @@ test('chuyen gia giao bai tap, thay muc khach da chia se (khong thay muc rieng t
   await page.goto(`/expert/cases/${caseId}`);
 
   await page.getByRole('tab', { name: 'Bài tập' }).click();
+  await noOverflow(page, 'expert case homework');
   await page.getByLabel('Tiêu đề').fill('Viet nhat ky biet on');
   await page.getByLabel('Hướng dẫn').fill('Moi toi ghi 3 dieu biet on');
   await page.getByRole('button', { name: 'Giao bài' }).click();
@@ -181,6 +187,7 @@ test('chuyen gia giao bai tap, thay muc khach da chia se (khong thay muc rieng t
 
   await page.getByRole('tab', { name: 'Theo dõi' }).click();
   await expect(page.getByText('Hom nay on hon')).toBeVisible();
+  await noOverflow(page, 'expert case tracking');
   await expect(page.getByText('Muc rieng tu cua toi')).toHaveCount(0);
   await expect(page.getByText(/GAD-7/).first()).toBeVisible();
 
@@ -196,6 +203,7 @@ test('chuyen gia giao bai tap, thay muc khach da chia se (khong thay muc rieng t
   await cp.goto(`/me/cases/${caseId}`);
   await cp.getByRole('tab', { name: 'Bài tập' }).click();
   await expect(cp.getByText('Moi toi ghi 3 dieu biet on')).toBeVisible();
+  await noOverflow(cp, 'client case homework');
   await cp.getByLabel('Bài làm của bạn').fill('1. Suc khoe 2. Gia dinh 3. Cong viec');
   await cp.getByRole('button', { name: 'Nộp bài' }).click();
   await expect(cp.getByText('Đã nộp').first()).toBeVisible();
@@ -216,7 +224,7 @@ test('chuyen gia giao bai tap, thay muc khach da chia se (khong thay muc rieng t
   // Quan tri khong doc duoc noi dung rieng tu cua ca
   await logout(page);
   await login(page, ACCOUNTS.admin);
-  expect((await page.request.get(`/api/cases/${caseId}/notes`)).status()).toBe(404);
+  expect((await page.request.get(`/api/cases/${caseId}/notes`)).status()).toBe(403);
   expect((await page.request.get(`/api/cases/${caseId}/client-tracking`)).status()).toBe(403);
   expect((await page.request.get(`/api/cases/${caseId}/homework`)).status()).toBe(403);
 });
