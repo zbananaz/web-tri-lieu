@@ -1,0 +1,16 @@
+{
+  "name": "webtrilieu",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.34.7",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "check": "pnpm -r --if-present typecheck && pnpm -r --if-present lint && pnpm -r --if-present test",
+    "dev:api": "pnpm --filter @wtl/api start:dev",
+    "dev:web": "pnpm --filter @wtl/web dev",
+    "db:generate": "pnpm --filter @wtl/api db:generate",
+    "db:migrate": "pnpm --filter @wtl/api db:migrate",
+    "db:seed": "pnpm --filter @wtl/api db:seed",
+    "e2e": "pnpm --filter @wtl/e2e test"
+  }
+}
