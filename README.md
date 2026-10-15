@@ -47,12 +47,12 @@ Tài khoản seed: `admin@webtrilieu.local`, `bsminh@webtrilieu.local`, `tlhoa@w
 
 ```powershell
 pnpm check                                     # build shared + typecheck + lint (api, web, e2e) + api: 7 unit + 91 e2e (DB test)
-pnpm e2e                                       # Playwright: 63 test chạy + 12 ảnh chụp màn hình bị bỏ qua (chỉ chạy khi SHOTS=1) (desktop 1280, tablet 768, mobile 375); cần DB đã seed, tự khởi động API/web nếu chưa chạy. Bộ test đăng nhập hơn 20 lần/phút từ một IP nên API chạy cho e2e phải đặt `AUTH_RATE_LIMIT_PER_MIN=300` và `RATE_LIMIT_PER_MIN=2000` (config Playwright và `.claude/launch.json` đã đặt sẵn; production giữ mặc định 20)
+pnpm e2e                                       # Playwright: 66 test chạy + 12 ảnh chụp màn hình bị bỏ qua (chỉ chạy khi SHOTS=1) (desktop 1280, tablet 768, mobile 375); cần DB đã seed, tự khởi động API/web nếu chưa chạy. Bộ test đăng nhập hơn 20 lần/phút từ một IP nên API chạy cho e2e phải đặt `AUTH_RATE_LIMIT_PER_MIN=300` và `RATE_LIMIT_PER_MIN=2000` (config Playwright và `.claude/launch.json` đã đặt sẵn; production giữ mặc định 20)
 .\scripts\db.ps1 status
 .\scripts\db.ps1 backup                        # pg_dump -> D:\Tool\PostgreSQL\backups (giữ 14 bản); khôi phục: pg_restore -d webtrilieu <file>
 ```
 
-Test API dùng DB `webtrilieu_test` (`TEST_DATABASE_URL`). `pnpm e2e` chạy trên DB dev thật (`webtrilieu`) vì đi qua API/web đang chạy: cuối mỗi lần chạy nó xoá bài viết thử, đóng hồ sơ thử, xoá ảnh đã tải lên, xoá thư thử trong `data/outbox` và khoá tài khoản `e2e.*@example.test` / `wave1.*@example.test` (tài khoản bị khoá vẫn còn lại trong DB, ảnh thử trong `data/uploads` được xoá).
+Test API dùng DB `webtrilieu_test` (`TEST_DATABASE_URL`). `pnpm e2e` chạy trên DB dev thật (`webtrilieu`) vì đi qua API/web đang chạy: cuối mỗi lần chạy nó xoá bài viết thử, đóng hồ sơ thử, xoá ảnh đã tải lên, xoá thư thử trong `data/outbox`, ẩn đánh giá thử (buổi hẹn "đã hoàn thành" thử được chèn thẳng vào DB dev bằng psql của `D:ToolPostgreSQL`) và khoá tài khoản `e2e.*@example.test` / `wave1.*@example.test` (tài khoản bị khoá vẫn còn lại trong DB, ảnh thử trong `data/uploads` được xoá).
 
 ## Bảo mật (đã làm)
 

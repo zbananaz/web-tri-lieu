@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { readdir, readFile, rm } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { expect, request, test, type Page } from '@playwright/test';
@@ -12,6 +13,20 @@ const pass2 = () => `${seedPassword()}-w2`;
 const OUTBOX = fileURLToPath(new URL('../../../data/outbox', import.meta.url));
 const ORIGIN = 'http://localhost:3000';
 let caseId = '';
+let reviewId = '';
+
+// Buoi hen "da hoan thanh" khong tao duoc qua API (buoi phai da dien ra), nen them thang vao DB dev bang psql cua D:Tool.
+function insertCompletedAppointment(id: string) {
+  const pw = process.env.POSTGRES_PASSWORD;
+  if (!pw) throw new Error('Can POSTGRES_PASSWORD trong .env');
+  const sql = `INSERT INTO appointments (case_id, expert_id, client_id, starts_at, ends_at, status, mode)
+    SELECT id, assigned_expert_id, client_id, now() - interval '2 days', now() - interval '2 days' + interval '50 minutes', 'completed', 'online'
+    FROM cases WHERE id = '${id}'`;
+  execFileSync('D:/Tool/PostgreSQL/pgsql/bin/psql.exe', ['-h', '127.0.0.1', '-p', '54329', '-U', 'postgres', '-d', 'webtrilieu', '-v', 'ON_ERROR_STOP=1', '-c', sql], {
+    env: { ...process.env, PGPASSWORD: pw },
+    stdio: 'pipe',
+  });
+}
 
 async function outboxFilesFor(to: string): Promise<{ file: string; text: string }[]> {
   let names: string[] = [];
@@ -36,6 +51,7 @@ test.afterAll(async ({ baseURL }) => {
   try {
     const res = await api.post('/api/auth/login', { data: { email: ACCOUNTS.admin, password: seedPassword() } });
     if (!res.ok()) return;
+    if (reviewId) await api.patch(`/api/admin/reviews/${reviewId}`, { data: { status: 'hidden' } }); // khong de danh gia thu hien tren trang chuyen gia that
     if (caseId) await api.post(`/api/cases/${caseId}/transition`, { data: { to: 'closed' } });
     const users = (await (await api.get('/api/admin/users')).json()) as { users?: { id: string; email: string }[] };
     const me = users.users?.find((u) => u.email === email);
@@ -244,6 +260,46 @@ test('chuyen gia giao bai tap, thay muc khach da chia se (khong thay muc rieng t
   expect((await page.request.get(`/api/cases/${caseId}/notes`)).status()).toBe(403);
   expect((await page.request.get(`/api/cases/${caseId}/client-tracking`)).status()).toBe(403);
   expect((await page.request.get(`/api/cases/${caseId}/homework`)).status()).toBe(403);
+});
+
+test('khach danh gia buoi da hoan thanh, quan tri duyet, hien cong khai khong kem ten khach', async ({ page, browser }) => {
+  test.setTimeout(150_000);
+  insertCompletedAppointment(caseId);
+  await login(page, email, pass2());
+  await page.goto(`/me/cases/${caseId}`);
+  await page.getByRole('tab', { name: 'Lịch hẹn' }).click();
+  await page.getByRole('button', { name: 'Đánh giá buổi hẹn' }).click();
+  await noOverflow(page, 'review box');
+  await page.getByRole('radio', { name: '4 sao' }).click();
+  await page.getByLabel(/Nhận xét/).fill('Danh gia e2e rat tan tam');
+  await page.getByRole('button', { name: 'Gửi đánh giá' }).click();
+  await expect(page.getByText('Bạn đã đánh giá 4/5 sao · Đang chờ duyệt')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Đánh giá buổi hẹn' })).toHaveCount(0); // moi buoi chi danh gia mot lan
+
+  const ctx = await browser.newContext({ baseURL: ORIGIN });
+  const ap = await ctx.newPage();
+  await login(ap, ACCOUNTS.admin);
+  await ap.goto('/admin/reviews');
+  const card = ap.getByRole('listitem').filter({ hasText: 'Danh gia e2e rat tan tam' });
+  await expect(card).toBeVisible();
+  await expect(card).toContainText('Khach Wave1'); // quan tri thay ten de duyet
+  const list = (await (await ap.request.get('/api/admin/reviews?status=pending')).json()) as { reviews: { id: string; comment: string }[] };
+  reviewId = list.reviews.find((r) => r.comment === 'Danh gia e2e rat tan tam')!.id;
+  await card.getByRole('button', { name: 'Đăng công khai' }).click();
+  await expect(ap.getByRole('listitem').filter({ hasText: 'Danh gia e2e rat tan tam' })).toHaveCount(0); // da roi khoi muc cho duyet
+
+  const pub = await ctx.newPage();
+  const experts = (await (await pub.request.get('/api/experts')).json()) as { experts: { id: string; fullName: string }[] };
+  const expertId = (await (await ap.request.get('/api/admin/reviews?status=published')).json() as { reviews: { id: string; expertName: string }[] }).reviews.find((r) => r.id === reviewId)!.expertName;
+  const target = experts.experts.find((e) => e.fullName === expertId)!;
+  // Trang cong khai luu cache toi da 60 giay (SEO), nen doi den khi hien
+  await pub.goto(`/experts/${target.id}`);
+  await expect(async () => {
+    await pub.reload();
+    await expect(pub.getByText('Danh gia e2e rat tan tam')).toBeVisible({ timeout: 1_500 });
+  }).toPass({ timeout: 80_000, intervals: [3_000] });
+  await expect(pub.getByText('Khach Wave1')).toHaveCount(0);
+  await ctx.close();
 });
 
 test('admin: trang duyet danh gia hoat dong', async ({ page }) => {
