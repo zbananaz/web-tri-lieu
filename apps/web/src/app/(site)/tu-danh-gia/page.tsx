@@ -9,6 +9,9 @@ import { api, errorMessage } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useQuery } from '@/lib/hooks';
 
+// Noi dung an toan khong duoc phu thuoc vao mot lan goi mang: dung so mac dinh khi khong tai duoc danh sach tu may chu.
+const FALLBACK_HOTLINES = [{ number: '115', label: 'Cấp cứu y tế' }];
+
 const SHORT: Record<AssessmentKind, string> = { phq9: 'PHQ-9 · Trầm cảm', gad7: 'GAD-7 · Lo âu' };
 
 export default function SelfAssessmentPage() {
@@ -36,12 +39,14 @@ export default function SelfAssessmentPage() {
     // Doi cau tra loi thi ket qua cu khong con dung nua
     setDone(null);
     setSaved(false);
+    setShare(false);
   };
 
   const switchKind = (k: AssessmentKind) => {
     setKind(k);
     setDone(null);
     setSaved(false);
+    setShare(false); // moi ket qua mac dinh rieng tu
     setSaveError(null);
     setMissing(false);
   };
@@ -77,6 +82,7 @@ export default function SelfAssessmentPage() {
     try {
       await api('/assessments', { body: { kind, answers: full, shared: share } });
       setSaved(true);
+      setShare(false);
     } catch (e) {
       setSaveError(errorMessage(e));
     } finally {
@@ -154,7 +160,7 @@ export default function SelfAssessmentPage() {
           {result.urgent && (
             <>
               <Alert tone="warm">Kết quả cho thấy bạn nên gặp chuyên gia sớm. Nếu bạn có ý nghĩ làm hại bản thân, hãy liên hệ ngay một trong các số dưới đây.</Alert>
-              <HotlineAlert hotlines={hot.data?.hotlines ?? []} />
+              <HotlineAlert hotlines={hot.data?.hotlines?.length ? hot.data.hotlines : FALLBACK_HOTLINES} />
             </>
           )}
           <div className="flex flex-wrap gap-3">

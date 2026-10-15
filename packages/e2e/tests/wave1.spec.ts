@@ -172,6 +172,22 @@ test('khach ghi nhat ky tam trang va luu ket qua tu danh gia, co chia se', async
   await page.getByLabel(/Chia sẻ kết quả này/).check();
   await page.getByRole('button', { name: 'Lưu kết quả' }).click();
   await expect(page.getByText('Đã lưu.')).toBeVisible();
+
+  // Luu them PHQ-9 de rieng tu: o "chia se" khong duoc dinh lai tu ket qua truoc
+  await page.getByRole('tab', { name: /PHQ-9/ }).click();
+  for (let i = 0; i < 9; i++) await answer(page, i, 0);
+  await page.getByRole('button', { name: 'Xem kết quả' }).click();
+  await expect(page.getByLabel(/Chia sẻ kết quả này/)).not.toBeChecked();
+  await page.getByRole('button', { name: 'Lưu kết quả' }).click();
+  await expect(page.getByText('Đã lưu.')).toBeVisible();
+
+  // Chuong thong bao tren thanh dau trang cong khai phai nam tron trong man hinh
+  await page.goto('/');
+  await page.getByRole('button', { name: /^Thông báo/ }).click();
+  const box = await page.getByRole('dialog', { name: 'Thông báo' }).boundingBox();
+  const vw = page.viewportSize()!.width;
+  expect(box!.x, 'menu chuong bi cat o mep trai').toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width, 'menu chuong bi cat o mep phai').toBeLessThanOrEqual(vw);
 });
 
 test('chuyen gia giao bai tap, thay muc khach da chia se (khong thay muc rieng tu), ghi chu rieng; khach nop bai', async ({ page, browser }) => {
@@ -190,6 +206,7 @@ test('chuyen gia giao bai tap, thay muc khach da chia se (khong thay muc rieng t
   await noOverflow(page, 'expert case tracking');
   await expect(page.getByText('Muc rieng tu cua toi')).toHaveCount(0);
   await expect(page.getByText(/GAD-7/).first()).toBeVisible();
+  await expect(page.getByText(/PHQ-9/)).toHaveCount(0); // ket qua PHQ-9 khach de rieng tu
 
   await page.getByRole('tab', { name: 'Ghi chú' }).click();
   await page.getByLabel('Ghi chú mới').fill('Ghi chu lam sang rieng tu cua chuyen gia');
