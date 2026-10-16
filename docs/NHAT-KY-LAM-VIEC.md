@@ -23,7 +23,7 @@ Quy ước: **sau mỗi việc làm xong, thêm một mục mới ở đầu dan
 ### 2026-10-16 — Brevo SMTP đã gửi thư thật thành công
 - Chủ dự án tự tạo tài khoản Brevo, tạo SMTP key và điền `SMTP_URL`, `MAIL_FROM` vào `.env` (không ghi lại giá trị ở đâu).
 - Hai lỗi đã gặp và cách sửa: (1) `525 5.7.1 Unauthorized IP address` do Brevo chặn IP lạ → vào Security > Authorized IPs tắt chặn hoặc thêm IP; (2) `MAIL_FROM` thiếu dấu `<` `>` quanh email → viết `"Tên <email>"`. Dấu `@` trong Login SMTP phải mã hóa thành `%40`.
-- Kiểm chứng bằng script tạm: đăng nhập SMTP (`verify`) thành công và gửi 1 thư thử tới địa chỉ gửi, Brevo trả `250 2.0.0 OK: queued`. Chưa xác nhận bằng mắt thư đã tới hộp thư; chưa thử luồng "Quên mật khẩu" trên web với email thật.
+- Kiểm chứng bằng script tạm: đăng nhập SMTP (`verify`) thành công và gửi 1 thư thử tới địa chỉ gửi, Brevo trả `250 2.0.0 OK: queued`. Sau đó chủ dự án tự thử trên web với email thật của mình: đăng ký, đăng nhập và "Quên mật khẩu" đều hoạt động (chủ dự án xác nhận bằng lời; mình không tự kiểm hộp thư).
 
 ### 2026-10-16 — Bỏ đường dẫn gắn cứng, viết lại hướng dẫn chạy
 - Yêu cầu của chủ dự án: máy nào cũng chạy được; ghi rõ cần công cụ gì, chạy lệnh gì, ở đâu; không hardcode đường dẫn.
