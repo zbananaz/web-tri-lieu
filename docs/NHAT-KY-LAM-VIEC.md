@@ -20,6 +20,9 @@ Quy ước: **sau mỗi việc làm xong, thêm một mục mới ở đầu dan
 
 ## Nhật ký
 
+### 2026-10-16 — Kết thúc công việc
+- Chủ dự án chốt kết thúc công việc và **không cần dọn ổ C** (thư mục `C:\Users\Admin\AppData\Local\ms-playwright` được giữ nguyên, không phải của dự án này). Email Brevo đã dùng được. Còn lại cho các phiên sau nếu có việc mới: thẩm định lâm sàng/pháp lý, nhắc lịch hẹn qua email, ứng dụng di động, kiểm WebSocket qua nginx/Caddy thật, thử hướng dẫn chạy trên máy Windows sạch.
+
 ### 2026-10-16 — Brevo SMTP đã gửi thư thật thành công
 - Chủ dự án tự tạo tài khoản Brevo, tạo SMTP key và điền `SMTP_URL`, `MAIL_FROM` vào `.env` (không ghi lại giá trị ở đâu).
 - Hai lỗi đã gặp và cách sửa: (1) `525 5.7.1 Unauthorized IP address` do Brevo chặn IP lạ → vào Security > Authorized IPs tắt chặn hoặc thêm IP; (2) `MAIL_FROM` thiếu dấu `<` `>` quanh email → viết `"Tên <email>"`. Dấu `@` trong Login SMTP phải mã hóa thành `%40`.
