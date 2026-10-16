@@ -7,12 +7,13 @@ Khách sàng lọc → quản trị duyệt → phân cho chuyên gia → đặt
 - `packages/shared` — schema zod, kiểu dùng chung, bảng chuyển trạng thái hồ sơ
 - `packages/e2e` — Playwright (luồng chính + kiểm tra tràn ngang + phân quyền)
 
-Chạy trên máy: [docs/HUONG-DAN-CHAY-LOCAL.md](docs/HUONG-DAN-CHAY-LOCAL.md). Nhật ký làm việc cho các phiên sau: [docs/NHAT-KY-LAM-VIEC.md](docs/NHAT-KY-LAM-VIEC.md) (thêm mục mới sau mỗi việc xong). Thiết kế chi tiết: [docs/spec.md](docs/spec.md). Các tính năng Đợt 1 (tìm chuyên gia, tự đánh giá, nhật ký tâm trạng, bài tập, ghi chú, đánh giá, thông báo, quên mật khẩu qua email): [docs/wave1-spec.md](docs/wave1-spec.md).
+Chạy trên máy: [docs/HUONG-DAN-CHAY-LOCAL.md](docs/HUONG-DAN-CHAY-LOCAL.md). Tự tạo dịch vụ gửi email (SMTP): [docs/HUONG-DAN-SMTP.md](docs/HUONG-DAN-SMTP.md). Nhật ký làm việc cho các phiên sau: [docs/NHAT-KY-LAM-VIEC.md](docs/NHAT-KY-LAM-VIEC.md) (thêm mục mới sau mỗi việc xong). Thiết kế chi tiết: [docs/spec.md](docs/spec.md). Các tính năng Đợt 1 (tìm chuyên gia, tự đánh giá, nhật ký tâm trạng, bài tập, ghi chú, đánh giá, thông báo, quên mật khẩu qua email): [docs/wave1-spec.md](docs/wave1-spec.md).
 
 ## Tính năng (đối chiếu các web trị liệu tâm lý)
 
 - **Tìm chuyên gia**: lọc theo lĩnh vực, hình thức, ngôn ngữ, chi phí tối đa; sắp xếp theo tên / có giờ trống sớm nhất / đánh giá cao nhất (`GET /experts`; bộ lọc nằm trong URL, hoạt động cả khi tắt JavaScript).
 - **Tự đánh giá PHQ-9 / GAD-7** (`/tu-danh-gia`): chấm điểm ngay trên trình duyệt (máy chủ tính lại khi lưu), hiện đường dây nóng nếu điểm cao hoặc câu 9 khác 0. Nội dung tiếng Việt là **bản nháp, cần chuyên gia lâm sàng thẩm định**; kết quả không phải chẩn đoán.
+- **Ảnh và trang giới thiệu**: mười ảnh trong `apps/web/public/images` (nguồn và lưu ý giấy phép ở `CREDITS.md`), dùng qua `components/Photo.tsx` (bộ lọc ấm chung trong `globals.css`) và `PageBanner`; trang `/ve-chung-toi` là bản nháp nội dung, cần chủ trung tâm duyệt. Ảnh bài viết mẫu gán theo slug trong `ARTICLE_PHOTOS`; bài có ảnh bìa riêng thì dùng ảnh bìa.
 - **Nhật ký tâm trạng + kết quả tự đánh giá đã lưu** (`/me/mood`): mặc định riêng tư; chỉ những mục khách bật "chia sẻ" mới hiện cho chuyên gia đang theo dõi ca đang mở (mỗi lần xem được ghi nhật ký). Quản trị viên không đọc được.
 - **Bài tập giữa các buổi**: chuyên gia giao, khách nộp bài (một lần).
 - **Ghi chú buổi**: riêng tư của chuyên gia (khách và quản trị không đọc được).

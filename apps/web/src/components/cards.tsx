@@ -2,6 +2,7 @@ import type { ArticleSummary, PublicExpert } from '@wtl/shared';
 import Link from 'next/link';
 import { formatDate, formatDateTime, formatVnd, MODE_LABELS } from '@/lib/format';
 import { LeafMark } from './LeafMark';
+import { ARTICLE_PHOTOS, Photo } from './Photo';
 import { Badge } from './ui';
 
 export function Avatar({ name, url, size = 56 }: { name: string; url?: string | null; size?: number }) {
@@ -81,27 +82,33 @@ export function ExpertCard({ e }: { e: PublicExpert }) {
   );
 }
 
-export function ArticleCard({ a }: { a: ArticleSummary }) {
+/** `featured`: thẻ nằm ngang (ảnh trái, chữ phải) từ màn hình sm trở lên, dùng cho bài đầu danh sách. */
+export function ArticleCard({ a, featured }: { a: ArticleSummary; featured?: boolean }) {
+  const photo = ARTICLE_PHOTOS[a.slug];
+  const frame = featured ? 'aspect-[16/9] sm:aspect-auto sm:h-full sm:min-h-[16rem] sm:w-[46%] sm:shrink-0' : 'aspect-[16/9] w-full';
+  const sizes = featured ? '(min-width: 1024px) 400px, (min-width: 640px) 45vw, 100vw' : '(min-width: 1024px) 360px, (min-width: 640px) 45vw, 100vw';
   return (
     <Link
       href={`/articles/${a.slug}`}
-      className="flex h-full flex-col overflow-hidden rounded-3xl border border-line/70 bg-surface shadow-soft transition duration-300 hover:-translate-y-0.5 hover:shadow-lift"
+      className={`flex h-full flex-col overflow-hidden rounded-3xl border border-line/70 bg-surface shadow-soft transition duration-300 hover:-translate-y-0.5 hover:shadow-lift ${featured ? 'sm:flex-row' : ''}`}
     >
       {a.coverUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={a.coverUrl} alt="" loading="lazy" className="aspect-[16/9] w-full object-cover" />
+        <img src={a.coverUrl} alt="" loading="lazy" className={`${frame} object-cover`} />
+      ) : photo ? (
+        <Photo name={photo} sizes={sizes} className={frame} />
       ) : (
-        <div aria-hidden className="grid aspect-[16/9] place-items-center bg-gradient-to-br from-brand-100 to-warm-100 text-brand-600">
+        <div aria-hidden className={`grid place-items-center bg-gradient-to-br from-brand-100 to-warm-100 text-brand-600 ${frame}`}>
           <LeafMark className="size-12 opacity-70" />
         </div>
       )}
-      <div className="flex flex-1 flex-col gap-2 p-5">
+      <div className={`flex flex-1 flex-col gap-2 p-5 ${featured ? 'sm:justify-center sm:p-8' : ''}`}>
         <div className="flex flex-wrap gap-1.5">
           {a.tags.slice(0, 2).map((t) => (
             <Badge key={t}>{t.replace(/-/g, ' ')}</Badge>
           ))}
         </div>
-        <h3 className="text-lg font-semibold leading-snug">{a.title}</h3>
+        <h3 className={`font-semibold leading-snug ${featured ? 'text-xl sm:text-2xl' : 'text-lg'}`}>{a.title}</h3>
         <p className="line-clamp-3 text-sm text-muted">{a.excerpt}</p>
         {a.publishedAt && <p className="mt-auto pt-2 text-xs text-muted">{formatDate(a.publishedAt)}</p>}
       </div>

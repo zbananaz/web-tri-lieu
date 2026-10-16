@@ -2,7 +2,8 @@ import type { ArticleSummary } from '@wtl/shared';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArticleCard } from '@/components/cards';
-import { Empty, PageTitle } from '@/components/ui';
+import { PageBanner } from '@/components/PageBanner';
+import { Empty } from '@/components/ui';
 import { serverApi } from '@/lib/server-api';
 
 export const metadata: Metadata = {
@@ -26,20 +27,28 @@ export default async function ArticlesPage({ searchParams }: PageProps<'/article
 
   return (
     <>
-      <PageTitle title={tag ? `Bài viết: ${tag}` : 'Bài viết'}>
-        {tag && (
-          <Link href="/articles" className="text-sm font-semibold text-brand-700 hover:underline">
-            Xem tất cả
-          </Link>
-        )}
-      </PageTitle>
+      <div className="mb-8 sm:mb-10">
+        <PageBanner photo="chanhNiem" eyebrow="Góc chia sẻ" title={tag ? `Bài viết: ${tag}` : 'Bài viết'}>
+          <p>Kiến thức nhẹ nhàng về sức khỏe tinh thần, để bạn hiểu mình hơn mỗi ngày.</p>
+          {tag && (
+            <Link href="/articles" className="mt-3 inline-block text-sm font-semibold text-white underline underline-offset-4">
+              Xem tất cả
+            </Link>
+          )}
+        </PageBanner>
+      </div>
       {articles.length === 0 ? (
         <Empty>Chưa có bài viết nào.</Empty>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {articles.map((a) => (
-            <ArticleCard key={a.id} a={a} />
-          ))}
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {articles.map((a, i) => {
+            const featured = i === 0 && page === 1 && !tag && articles.length > 3;
+            return (
+              <div key={a.id} className={featured ? 'sm:col-span-2' : ''}>
+                <ArticleCard a={a} featured={featured} />
+              </div>
+            );
+          })}
         </div>
       )}
       {pages > 1 && (
