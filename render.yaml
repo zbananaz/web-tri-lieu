@@ -1,0 +1,34 @@
+# Render Blueprint cho API (NestJS). Web chay tren Vercel, DB tren Neon. Huong dan: docs/HUONG-DAN-DEPLOY.md
+# Cac bien `sync: false` la bi mat/thay doi theo ban: dien tren Render, KHONG ghi gia tri that vao file nay.
+services:
+  - type: web
+    name: web-tri-lieu-api
+    runtime: node
+    plan: free
+    region: singapore
+    healthCheckPath: /api/health
+    # --prod=false: Render dat NODE_ENV=production luc build, ma build can devDependencies (nest cli, typescript) va tsx (chay migrate).
+    buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm --filter @wtl/shared build && pnpm --filter @wtl/api build
+    # Migrate truoc khi khoi dong (idempotent). Goi qua pnpm de tsx nam tren PATH.
+    startCommand: pnpm --filter @wtl/api db:migrate && pnpm --filter @wtl/api start:prod
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: NODE_ENV
+        value: production
+      - key: API_HOST
+        value: 0.0.0.0
+      - key: DATABASE_URL
+        sync: false
+      - key: WEB_ORIGIN
+        sync: false
+      - key: SMTP_URL
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      # Free plan khong co o dia ben vung: anh tai len se mat khi API khoi dong lai. Xem muc "Anh tai len" trong huong dan.
+      - key: UPLOAD_DIR
+        value: /tmp/uploads
+      # Vercel + proxy cua Render = 2 lop. Kiem tra lai sau khi chay that (xem huong dan).
+      - key: TRUST_PROXY_HOPS
+        value: 2
