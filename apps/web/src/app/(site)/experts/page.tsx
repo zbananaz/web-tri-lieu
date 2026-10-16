@@ -2,7 +2,8 @@ import { EXPERT_SORTS, type PublicExpert } from '@wtl/shared';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ExpertCard } from '@/components/cards';
-import { Button, Empty, PageTitle, SelectField, TextField } from '@/components/ui';
+import { PageBanner } from '@/components/PageBanner';
+import { Button, Empty, SelectField, TextField } from '@/components/ui';
 import { serverApi } from '@/lib/server-api';
 
 export const metadata: Metadata = {
@@ -51,7 +52,11 @@ export default async function ExpertsPage({ searchParams }: PageProps<'/experts'
 
   return (
     <>
-      <PageTitle title="Đội ngũ chuyên gia" />
+      <div className="mb-6">
+        <PageBanner photo="troChuyen" eyebrow="Đội ngũ" title="Đội ngũ chuyên gia">
+          <p>Mỗi chuyên gia đều có hồ sơ, chuyên môn và giờ trống rõ ràng, để bạn biết trước mình sẽ gặp ai.</p>
+        </PageBanner>
+      </div>
       <form method="get" action="/experts" aria-label="Tìm chuyên gia" className="mb-6 space-y-4 rounded-3xl border border-line/70 bg-surface p-4 shadow-soft sm:p-5">
         <TextField label="Tìm theo tên hoặc chuyên môn" name="q" defaultValue={q} maxLength={80} placeholder="Ví dụ: lo âu, trầm cảm, cặp đôi…" />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
