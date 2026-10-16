@@ -137,7 +137,7 @@ Luồng nên thử:
 
 Khi `.env` **không** có `SMTP_URL`, thư được ghi ra file JSON trong `<repo>\data\outbox\`. Vào `/forgot-password`, nhập email, rồi mở file mới nhất trong thư mục đó để lấy liên kết đặt lại. Production mà không có SMTP thì không gửi và không ghi ra đĩa.
 
-Để gửi email thật: xem phần Email trong `.env.example` (Brevo, miễn phí) và README mục "Trước khi đưa lên thật".
+Để gửi email thật: làm theo [HUONG-DAN-SMTP.md](HUONG-DAN-SMTP.md) (tạo dịch vụ SMTP riêng, ví dụ Brevo miễn phí, từng bước) và phần Email trong `.env.example`.
 
 ## 7. Chạy kiểm tra
 

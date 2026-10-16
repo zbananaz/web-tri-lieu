@@ -20,6 +20,11 @@ Quy ước: **sau mỗi việc làm xong, thêm một mục mới ở đầu dan
 
 ## Nhật ký
 
+### 2026-10-16 — Viết hướng dẫn tạo dịch vụ SMTP cho đồng nghiệp
+- Thêm `docs/HUONG-DAN-SMTP.md`: đồng nghiệp tự tạo dịch vụ gửi email của mình (Brevo từng bước; Gmail/dịch vụ khác tóm tắt), cách ghép `SMTP_URL` (mã hóa `%XX`, `smtp://` cổng 587, `smtps://` cổng 465), điền `.env`, khởi động lại API, thử qua `/forgot-password` hoặc script kiểm tra, bảng lỗi thường gặp, lưu ý production. Có link từ README và `HUONG-DAN-CHAY-LOCAL.md` mục 6.
+- Nội dung dựa trên cấu hình đã chạy thật ở mục Brevo bên dưới và mã `MailerService`/`env.ts`. Tên menu Brevo viết theo trí nhớ nên có thể đã đổi; hạn mức gói miễn phí và cách tạo App password của Gmail chưa tra lại trên trang chính thức. Chưa có đồng nghiệp làm thử theo hướng dẫn. Chưa commit.
+- Phiên khác (fork "Lên plan") đang làm đợt giao diện công khai (ảnh, bố cục trang chủ, trang "Về chúng tôi"); mục nhật ký của đợt đó do phiên đó ghi.
+
 ### 2026-10-16 — Kết thúc công việc
 - Chủ dự án chốt kết thúc công việc và **không cần dọn ổ C** (thư mục `C:\Users\Admin\AppData\Local\ms-playwright` được giữ nguyên, không phải của dự án này). Email Brevo đã dùng được. Còn lại cho các phiên sau nếu có việc mới: thẩm định lâm sàng/pháp lý, nhắc lịch hẹn qua email, ứng dụng di động, kiểm WebSocket qua nginx/Caddy thật, thử hướng dẫn chạy trên máy Windows sạch.
 
