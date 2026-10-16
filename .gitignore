@@ -11,3 +11,11 @@ playwright-report
 .turbo
 
 .claude/settings.local.json
+
+# Cau hinh rieng cua tung may (duong dan cong cu), xem scripts/env.local.example.ps1
+scripts/env.local.ps1
+
+packages/e2e/shots
+
+# Anh tai len (du lieu nguoi dung, khong dua vao git)
+data/

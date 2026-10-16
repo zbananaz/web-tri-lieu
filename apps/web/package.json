@@ -6,12 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "typecheck": "next typegen && tsc --noEmit",
     "lint": "eslint"
   },
   "dependencies": {
+    "@wtl/shared": "workspace:*",
     "next": "16.4.1",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "socket.io-client": "^4.8.4"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",

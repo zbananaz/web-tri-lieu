@@ -5,12 +5,13 @@
   "packageManager": "pnpm@10.34.7",
   "engines": { "node": ">=22" },
   "scripts": {
-    "check": "pnpm -r --if-present typecheck && pnpm -r --if-present lint && pnpm -r --if-present test",
+    "check": "pnpm --filter @wtl/shared build && pnpm -r --if-present typecheck && pnpm -r --if-present lint && pnpm --filter @wtl/api test && pnpm --filter @wtl/api test:e2e",
+    "build": "pnpm --filter @wtl/shared build && pnpm --filter @wtl/api build && pnpm --filter @wtl/web build",
     "dev:api": "pnpm --filter @wtl/api start:dev",
     "dev:web": "pnpm --filter @wtl/web dev",
     "db:generate": "pnpm --filter @wtl/api db:generate",
     "db:migrate": "pnpm --filter @wtl/api db:migrate",
     "db:seed": "pnpm --filter @wtl/api db:seed",
-    "e2e": "pnpm --filter @wtl/e2e test"
+    "e2e": "pnpm --filter @wtl/e2e e2e"
   }
 }
