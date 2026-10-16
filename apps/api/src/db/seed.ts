@@ -18,7 +18,7 @@ export const SEED_ACCOUNTS = {
   client: 'khach@webtrilieu.local',
 } as const;
 
-const SPECIALTIES = [
+export const SPECIALTIES = [
   { slug: 'lo-au', name: 'Lo âu' },
   { slug: 'tram-cam', name: 'Trầm cảm' },
   { slug: 'stress-cong-viec', name: 'Căng thẳng công việc' },
