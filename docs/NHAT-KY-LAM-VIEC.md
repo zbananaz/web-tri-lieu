@@ -20,6 +20,11 @@ Quy ước: **sau mỗi việc làm xong, thêm một mục mới ở đầu dan
 
 ## Nhật ký
 
+### 2026-10-16 — Brevo SMTP đã gửi thư thật thành công
+- Chủ dự án tự tạo tài khoản Brevo, tạo SMTP key và điền `SMTP_URL`, `MAIL_FROM` vào `.env` (không ghi lại giá trị ở đâu).
+- Hai lỗi đã gặp và cách sửa: (1) `525 5.7.1 Unauthorized IP address` do Brevo chặn IP lạ → vào Security > Authorized IPs tắt chặn hoặc thêm IP; (2) `MAIL_FROM` thiếu dấu `<` `>` quanh email → viết `"Tên <email>"`. Dấu `@` trong Login SMTP phải mã hóa thành `%40`.
+- Kiểm chứng bằng script tạm: đăng nhập SMTP (`verify`) thành công và gửi 1 thư thử tới địa chỉ gửi, Brevo trả `250 2.0.0 OK: queued`. Chưa xác nhận bằng mắt thư đã tới hộp thư; chưa thử luồng "Quên mật khẩu" trên web với email thật.
+
 ### 2026-10-16 — Bỏ đường dẫn gắn cứng, viết lại hướng dẫn chạy
 - Yêu cầu của chủ dự án: máy nào cũng chạy được; ghi rõ cần công cụ gì, chạy lệnh gì, ở đâu; không hardcode đường dẫn.
 - `scripts/env.ps1` tự tìm gốc repo từ vị trí của chính nó; dùng công cụ trên `PATH`. Nếu có `WTL_TOOL_DIR` (đặt trong `scripts/env.local.ps1`, file bị `.gitignore`, mẫu `env.local.example.ps1`) thì gom cache/PostgreSQL portable/Playwright vào đó. `PGDATA` mặc định `<repo>\data\pgdata`, `PGPORT` mặc định 54329.

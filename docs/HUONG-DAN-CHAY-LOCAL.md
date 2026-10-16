@@ -157,6 +157,8 @@ pnpm e2e       # Playwright trên 3 cỡ màn hình; cần DB đã seed và `psq
 | API báo không kết nối được DB | `.\scripts\db.ps1 start` rồi `.\scripts\db.ps1 status`. Kiểm tra `DATABASE_URL` dùng đúng cổng `54329` và đúng mật khẩu. |
 | Cổng 3000 hoặc 4000 đang bị chiếm | `Get-NetTCPConnection -LocalPort 3000,4000 -State Listen`, rồi `Stop-Process -Id <PID>`. |
 | Đăng nhập báo quá nhiều lần thử | Rate limit đăng nhập mặc định 20 lần/phút/IP; đợi 1 phút. |
+| Gửi email Brevo báo `525 5.7.1 Unauthorized IP address` | Brevo chặn IP máy bạn: Security → Authorized IPs, tắt chặn hoặc thêm IP hiện tại. |
+| Gửi email báo `Invalid login` / `EAUTH` khác | Kiểm tra Login SMTP đã mã hóa `@` thành `%40`, khóa còn hiệu lực, `MAIL_FROM` có dạng `"Tên <email>"` và email đã xác minh ở Senders. |
 | Quên mật khẩu quản trị | `pnpm --filter "@wtl/api" admin:reset-password <email>` |
 | Sao lưu DB | `.\scripts\db.ps1 backup` (ra thư mục `backups` cạnh thư mục dữ liệu DB, giữ 14 bản mới nhất) |
 | Muốn xóa sạch DB làm lại | `.\scripts\db.ps1 reset`, rồi `pnpm db:migrate` và `pnpm db:seed` (mất toàn bộ dữ liệu dev). |
