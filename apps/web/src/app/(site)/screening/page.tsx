@@ -2,7 +2,8 @@
 
 import type { PreferredMode, PublicQuestion } from '@wtl/shared';
 import Link from 'next/link';
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, type ReactNode, useState } from 'react';
+import { Photo } from '@/components/Photo';
 import { Alert, Button, Card, LinkButton, Loading, PageTitle, SelectField, TextArea } from '@/components/ui';
 import { api, errorMessage } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -17,6 +18,25 @@ interface Result {
   id: string;
   riskLevel: string;
   hotlines: Hotline[];
+}
+
+function Shell({ children }: { children: ReactNode }) {
+  return (
+    <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
+      <aside className="lg:col-span-4">
+        <div className="lg:sticky lg:top-24">
+          <Photo name="langNghe" eager sizes="(min-width: 1024px) 30vw, 100vw" className="aspect-[16/10] rounded-[2rem] shadow-soft lg:aspect-[4/5]" />
+          <div className="mt-5 space-y-2">
+            <p className="font-[family-name:var(--font-display)] text-xl text-brand-700">Hãy cứ chậm rãi</p>
+            <p className="text-sm text-muted">
+              Không có câu trả lời đúng hay sai. Chỉ cần nói thật với mình ở thời điểm này. Bạn có thể bỏ qua các câu không bắt buộc.
+            </p>
+          </div>
+        </div>
+      </aside>
+      <div className="lg:col-span-8">{children}</div>
+    </div>
+  );
 }
 
 function HotlineBox({ hotlines }: { hotlines: Hotline[] }) {
@@ -86,7 +106,8 @@ export default function ScreeningPage() {
 
   if (!user) {
     return (
-      <Card className="mx-auto max-w-lg text-center">
+      <Shell>
+      <Card className="text-center lg:mt-8">
         <h1 className="text-2xl font-bold">Bắt đầu sàng lọc</h1>
         <p className="mt-2 text-muted">
           Để câu trả lời được lưu riêng tư và bạn có thể theo dõi kết quả, vui lòng tạo tài khoản hoặc đăng nhập. Mất chưa đến 5 phút.
@@ -98,6 +119,7 @@ export default function ScreeningPage() {
           </LinkButton>
         </div>
       </Card>
+      </Shell>
     );
   }
   if (user.role !== 'client') {
@@ -107,12 +129,14 @@ export default function ScreeningPage() {
 
   if (result) {
     return (
-      <Card className="mx-auto max-w-xl space-y-4 text-center">
+      <Shell>
+      <Card className="space-y-4 text-center lg:mt-8">
         <h1 className="text-2xl font-bold">Cảm ơn bạn đã chia sẻ</h1>
         <p className="text-muted">Hồ sơ của bạn đã được gửi. Đội ngũ sẽ xem xét và ghép bạn với chuyên gia phù hợp.</p>
         {result.hotlines.length > 0 && <div className="text-left"><HotlineBox hotlines={result.hotlines} /></div>}
         <LinkButton href={`/me/cases/${result.id}`}>Xem hồ sơ của tôi</LinkButton>
       </Card>
+      </Shell>
     );
   }
 
@@ -149,7 +173,7 @@ export default function ScreeningPage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <Shell>
       <PageTitle title="Sàng lọc ban đầu" />
       <p className="mb-6 text-muted">
         Câu trả lời chỉ được dùng để hiểu nhu cầu của bạn và ghép chuyên gia phù hợp. Bạn có thể bỏ qua các câu không bắt buộc.
@@ -179,6 +203,6 @@ export default function ScreeningPage() {
         </div>
         <HotlineBox hotlines={qs.data.hotlines} />
       </form>
-    </div>
+    </Shell>
   );
 }

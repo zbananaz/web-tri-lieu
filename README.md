@@ -13,6 +13,7 @@ Chạy trên máy: [docs/HUONG-DAN-CHAY-LOCAL.md](docs/HUONG-DAN-CHAY-LOCAL.md).
 
 - **Tìm chuyên gia**: lọc theo lĩnh vực, hình thức, ngôn ngữ, chi phí tối đa; sắp xếp theo tên / có giờ trống sớm nhất / đánh giá cao nhất (`GET /experts`; bộ lọc nằm trong URL, hoạt động cả khi tắt JavaScript).
 - **Tự đánh giá PHQ-9 / GAD-7** (`/tu-danh-gia`): chấm điểm ngay trên trình duyệt (máy chủ tính lại khi lưu), hiện đường dây nóng nếu điểm cao hoặc câu 9 khác 0. Nội dung tiếng Việt là **bản nháp, cần chuyên gia lâm sàng thẩm định**; kết quả không phải chẩn đoán.
+- **Ảnh và trang giới thiệu**: mười ảnh trong `apps/web/public/images` (nguồn và lưu ý giấy phép ở `CREDITS.md`), dùng qua `components/Photo.tsx` (bộ lọc ấm chung trong `globals.css`) và `PageBanner`; trang `/ve-chung-toi` là bản nháp nội dung, cần chủ trung tâm duyệt. Ảnh bài viết mẫu gán theo slug trong `ARTICLE_PHOTOS`; bài có ảnh bìa riêng thì dùng ảnh bìa.
 - **Nhật ký tâm trạng + kết quả tự đánh giá đã lưu** (`/me/mood`): mặc định riêng tư; chỉ những mục khách bật "chia sẻ" mới hiện cho chuyên gia đang theo dõi ca đang mở (mỗi lần xem được ghi nhật ký). Quản trị viên không đọc được.
 - **Bài tập giữa các buổi**: chuyên gia giao, khách nộp bài (một lần).
 - **Ghi chú buổi**: riêng tư của chuyên gia (khách và quản trị không đọc được).

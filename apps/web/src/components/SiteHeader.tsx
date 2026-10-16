@@ -12,6 +12,7 @@ const LINKS = [
   { href: '/experts', label: 'Chuyên gia' },
   { href: '/articles', label: 'Bài viết' },
   { href: '/tu-danh-gia', label: 'Tự đánh giá' },
+  { href: '/ve-chung-toi', label: 'Về chúng tôi' },
 ];
 
 export function Logo() {
@@ -58,7 +59,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Logo />
-        <nav aria-label="Chính" className="hidden items-center gap-1 md:flex">
+        <nav aria-label="Chính" className="hidden items-center gap-1 lg:flex">
           {LINKS.map((l) => (
             <Link key={l.href} href={l.href} className="rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-brand-100/60">
               {l.label}
@@ -68,8 +69,8 @@ export function SiteHeader() {
           {user && <NotificationBell />}
           {authArea}
         </nav>
-        <div className="flex items-center gap-2 md:hidden">
-          {user && <NotificationBell menuClass="max-md:fixed max-md:inset-x-4 max-md:top-16 max-md:!w-auto md:right-0" />}
+        <div className="flex items-center gap-2 lg:hidden">
+          {user && <NotificationBell menuClass="max-lg:fixed max-lg:inset-x-4 max-lg:top-16 max-lg:!w-auto lg:right-0" />}
         <button
           type="button"
           className="grid size-11 place-items-center rounded-full border border-line"
@@ -85,7 +86,7 @@ export function SiteHeader() {
         </div>
       </div>
       {open && (
-        <nav id="mobile-menu" aria-label="Di động" className="flex flex-col gap-2 border-t border-line bg-bg px-4 py-4 md:hidden">
+        <nav id="mobile-menu" aria-label="Di động" className="flex flex-col gap-2 border-t border-line bg-bg px-4 py-4 lg:hidden">
           {LINKS.map((l) => (
             <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="rounded-xl px-3 py-3 font-medium hover:bg-brand-50">
               {l.label}
@@ -119,6 +120,11 @@ export function SiteFooter() {
             <li>
               <Link href="/articles" className="hover:underline">
                 Bài viết
+              </Link>
+            </li>
+            <li>
+              <Link href="/ve-chung-toi" className="hover:underline">
+                Về chúng tôi
               </Link>
             </li>
             <li>
