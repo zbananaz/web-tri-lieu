@@ -69,7 +69,7 @@ export function SiteHeader() {
           {authArea}
         </nav>
         <div className="flex items-center gap-2 md:hidden">
-          {user && <NotificationBell />}
+          {user && <NotificationBell menuClass="max-md:fixed max-md:inset-x-4 max-md:top-16 max-md:!w-auto md:right-0" />}
         <button
           type="button"
           className="grid size-11 place-items-center rounded-full border border-line"

@@ -76,7 +76,10 @@ export function NotificationBell({ menuClass = 'right-0' }: { menuClass?: string
     <div ref={box} className="relative">
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          if (!open) void load(); // mo chuong thi lam moi ngay, khong cho chu ky 30 giay
+          setOpen((v) => !v);
+        }}
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-label={unread > 0 ? `Thông báo, ${unread} chưa đọc` : 'Thông báo'}

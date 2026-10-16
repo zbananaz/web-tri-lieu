@@ -24,6 +24,7 @@ const schema = z.object({
   // So lop proxy tin cay truoc API (de lay IP that cho rate limit / nhat ky). Mac dinh production: 2 = Next + reverse proxy (nginx/Caddy).
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).optional(),
   // Gioi han dang nhap/dang ky moi phut moi IP. Giu 20 o production; chi nang len khi chay bo e2e (hon 20 lan dang nhap/phut tu mot may).
+  RATE_LIMIT_PER_MIN: z.coerce.number().int().min(30).max(100_000).default(120),
   AUTH_RATE_LIMIT_PER_MIN: z.coerce.number().int().min(5).max(10_000).default(20),
   // Thu muc luu anh tai len (mac dinh <goc repo>/data/uploads, nam o o D cung repo). Dat ra o dia rieng khi len production.
   UPLOAD_DIR: z.string().min(1).optional(),
@@ -47,6 +48,7 @@ export const env = {
   sessionTtlDays: parsed.SESSION_TTL_DAYS,
   seedPassword: parsed.SEED_PASSWORD,
   authRateLimitPerMin: parsed.AUTH_RATE_LIMIT_PER_MIN,
+  rateLimitPerMin: parsed.RATE_LIMIT_PER_MIN,
   uploadDir: parsed.UPLOAD_DIR ?? join(rootDir, 'data', parsed.NODE_ENV === 'test' ? 'uploads-test' : 'uploads'),
   smtpUrl: parsed.SMTP_URL,
   mailFrom: parsed.MAIL_FROM,
